@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hydrate_mobile_flutter/environment.dart';
 import 'package:hydrate_mobile_flutter/src/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/settings/settings_view.dart';
 
@@ -15,6 +16,9 @@ class HydrateNavigation extends StatefulWidget {
 
 class _HydrateNavigationState extends State<HydrateNavigation> {
   int currentPageIndex = 0;
+
+  // Example of accessing environment variables
+  String apiKey = Environment.googleMapsKey;
 
   @override
   Widget build(BuildContext context) {
