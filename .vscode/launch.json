@@ -5,14 +5,15 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Flutter",
+      "name": "Pixel 9 Pro",
       "type": "dart",
       "request": "launch",
       "program": "lib/main.dart",
       "args": [
         "--dart-define-from-file",
         "dev.env"
-      ]
+      ],
+      "deviceId": "49111FDAP0012G"
     },
     {
       "name": "hydrate_mobile_flutter",
