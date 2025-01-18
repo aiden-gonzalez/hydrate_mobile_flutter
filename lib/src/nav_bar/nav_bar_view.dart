@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hydrate_mobile_flutter/src/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/settings/settings_view.dart';
-import 'package:flutter_config/flutter_config.dart';
 
 /// Edited flutter code sample for [NavigationBar].
 
@@ -17,9 +16,6 @@ class HydrateNavigation extends StatefulWidget {
 class _HydrateNavigationState extends State<HydrateNavigation> {
   int currentPageIndex = 0;
 
-  // Example of how to load environment variable
-  String mapskey = FlutterConfig.get("GOOGLE_MAPS_API_KEY");
-
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -30,7 +26,7 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
             currentPageIndex = index;
           });
         },
-        indicatorColor: Colors.cyanAccent,
+        indicatorColor: Colors.amber,
         selectedIndex: currentPageIndex,
         destinations: const <Widget>[
           NavigationDestination(
@@ -39,19 +35,14 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
             label: 'Home',
           ),
           NavigationDestination(
-            selectedIcon: Badge(
-              label: Text('2'),
-              child: Icon(Icons.account_circle)
-            ),
             icon: Badge(
               label: Text('2'),
-              child: Icon(Icons.account_circle_outlined),
+              child: Icon(Icons.messenger_sharp),
             ),
             label: 'Profile',
           ),
           NavigationDestination(
-            selectedIcon: Badge(child: Icon(Icons.settings)),
-            icon: Badge(child: Icon(Icons.settings_outlined)),
+            icon: Badge(child: Icon(Icons.notifications_sharp)),
             label: 'Settings',
           ),
         ],
@@ -72,31 +63,26 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
         ),
 
         /// Profile page
-        Scaffold(
-          appBar: AppBar(
-            title: const Text("Profile")
+        const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Column(
+            children: <Widget>[
+              Card(
+                child: ListTile(
+                  leading: Icon(Icons.notifications_sharp),
+                  title: Text('Notification 1'),
+                  subtitle: Text('This is a notification'),
+                ),
+              ),
+              Card(
+                child: ListTile(
+                  leading: Icon(Icons.notifications_sharp),
+                  title: Text('Notification 2'),
+                  subtitle: Text('This is a notification'),
+                ),
+              ),
+            ],
           ),
-          body: Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Column(
-              children: <Widget>[
-                Card(
-                  child: ListTile(
-                    leading: Icon(Icons.notifications_sharp),
-                    title: Text('Notification 1'),
-                    subtitle: Text('This is a notification'),
-                  ),
-                ),
-                Card(
-                  child: ListTile(
-                    leading: Icon(Icons.notifications_sharp),
-                    title: Text('Notification 2'),
-                    subtitle: Text('This is a notification'),
-                  ),
-                ),
-              ],
-            ),
-          )
         ),
 
         /// Settings page
