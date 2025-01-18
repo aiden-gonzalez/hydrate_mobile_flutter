@@ -5,10 +5,16 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+apply from: project(':flutter_config').projectDir.getPath() + "/dotenv.gradle"
+
 android {
     namespace = "com.example.hydrate_mobile_flutter"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
+
+    buildFeatures {
+        buildConfig = true
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8

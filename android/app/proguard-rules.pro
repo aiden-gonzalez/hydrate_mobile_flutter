@@ -1,0 +1,1 @@
+-keep class com.example.hydrate_mobile_flutter.BuildConfig { *; }
