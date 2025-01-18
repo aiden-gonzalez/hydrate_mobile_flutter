@@ -77,7 +77,7 @@ class MyApp extends StatelessWidget {
                   // default:
                   //   return const SampleItemListView();
                   default:
-                    return const NavigationExample();
+                    return const HydrateNavigation(controller: settingsController);
                 }
               },
             );
