@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hydrate_mobile_flutter/environment.dart';
+import 'package:hydrate_mobile_flutter/src/google_maps/google_maps_view.dart';
 import 'package:hydrate_mobile_flutter/src/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/settings/settings_view.dart';
 
@@ -58,18 +59,7 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
       ),
       body: <Widget>[
         /// Home page
-        Card(
-          shadowColor: Colors.transparent,
-          margin: const EdgeInsets.all(8.0),
-          child: SizedBox.expand(
-            child: Center(
-              child: Text(
-                'Home page',
-                style: theme.textTheme.titleLarge,
-              ),
-            ),
-          ),
-        ),
+        SafeArea(child: MapSample()),
 
         /// Profile page
         Scaffold(
