@@ -30,7 +30,7 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
             currentPageIndex = index;
           });
         },
-        indicatorColor: Colors.amber,
+        indicatorColor: Colors.cyanAccent,
         selectedIndex: currentPageIndex,
         destinations: const <Widget>[
           NavigationDestination(
@@ -39,14 +39,19 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
             label: 'Home',
           ),
           NavigationDestination(
+            selectedIcon: Badge(
+              label: Text('2'),
+              child: Icon(Icons.account_circle)
+            ),
             icon: Badge(
               label: Text('2'),
-              child: Icon(Icons.messenger_sharp),
+              child: Icon(Icons.account_circle_outlined),
             ),
             label: 'Profile',
           ),
           NavigationDestination(
-            icon: Badge(child: Icon(Icons.notifications_sharp)),
+            selectedIcon: Badge(child: Icon(Icons.settings)),
+            icon: Badge(child: Icon(Icons.settings_outlined)),
             label: 'Settings',
           ),
         ],
@@ -67,26 +72,31 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
         ),
 
         /// Profile page
-        const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Column(
-            children: <Widget>[
-              Card(
-                child: ListTile(
-                  leading: Icon(Icons.notifications_sharp),
-                  title: Text('Notification 1'),
-                  subtitle: Text('This is a notification'),
-                ),
-              ),
-              Card(
-                child: ListTile(
-                  leading: Icon(Icons.notifications_sharp),
-                  title: Text('Notification 2'),
-                  subtitle: Text('This is a notification'),
-                ),
-              ),
-            ],
+        Scaffold(
+          appBar: AppBar(
+            title: const Text("Profile")
           ),
+          body: Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Column(
+              children: <Widget>[
+                Card(
+                  child: ListTile(
+                    leading: Icon(Icons.notifications_sharp),
+                    title: Text('Notification 1'),
+                    subtitle: Text('This is a notification'),
+                  ),
+                ),
+                Card(
+                  child: ListTile(
+                    leading: Icon(Icons.notifications_sharp),
+                    title: Text('Notification 2'),
+                    subtitle: Text('This is a notification'),
+                  ),
+                ),
+              ],
+            ),
+          )
         ),
 
         /// Settings page
