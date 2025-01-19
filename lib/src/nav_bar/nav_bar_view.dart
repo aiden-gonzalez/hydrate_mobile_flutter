@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hydrate_mobile_flutter/environment.dart';
 import 'package:hydrate_mobile_flutter/src/google_maps/google_maps_view.dart';
+import 'package:hydrate_mobile_flutter/src/profile/profile_view.dart';
 import 'package:hydrate_mobile_flutter/src/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/settings/settings_view.dart';
 
@@ -62,35 +63,10 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
         SafeArea(child: MapSample()),
 
         /// Profile page
-        Scaffold(
-          appBar: AppBar(
-            title: const Text("Profile")
-          ),
-          body: Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Column(
-              children: <Widget>[
-                Card(
-                  child: ListTile(
-                    leading: Icon(Icons.notifications_sharp),
-                    title: Text('Notification 1'),
-                    subtitle: Text('This is a notification'),
-                  ),
-                ),
-                Card(
-                  child: ListTile(
-                    leading: Icon(Icons.notifications_sharp),
-                    title: Text('Notification 2'),
-                    subtitle: Text('This is a notification'),
-                  ),
-                ),
-              ],
-            ),
-          )
-        ),
+        ProfileView(settingsController: widget.controller),
 
         /// Settings page
-        SettingsView(controller: widget.controller)
+        SettingsView(settingsControler: widget.controller)
       ][currentPageIndex],
     );
   }
