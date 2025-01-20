@@ -32,7 +32,6 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
             currentPageIndex = index;
           });
         },
-        indicatorColor: Colors.cyanAccent,
         selectedIndex: currentPageIndex,
         destinations: const <Widget>[
           NavigationDestination(
@@ -41,10 +40,8 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
             label: 'Home',
           ),
           NavigationDestination(
-            selectedIcon: Badge(
-              label: Text('2'),
-              child: Icon(Icons.account_circle)
-            ),
+            selectedIcon:
+                Badge(label: Text('2'), child: Icon(Icons.account_circle)),
             icon: Badge(
               label: Text('2'),
               child: Icon(Icons.account_circle_outlined),
