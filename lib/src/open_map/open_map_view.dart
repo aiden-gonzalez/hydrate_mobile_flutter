@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:flutter/foundation.dart';
 
 class OpenMapView extends StatefulWidget {
   const OpenMapView({super.key});
@@ -28,7 +29,27 @@ class _OpenMapViewState extends State<OpenMapView> {
           )
         ),
         children: [
-          openStreetMapTileLayer
+          openStreetMapTileLayer,
+          MarkerLayer(
+            markers: [
+              Marker(
+                point: LatLng(1.286493, 103.860359),
+                width: 50,
+                height: 50,
+                alignment: Alignment.topCenter,
+                child: GestureDetector(
+                  onTap: () {
+                    debugPrint("tapped marker");
+                  },
+                  child: Icon(
+                    Icons.location_pin,
+                    size: 50,
+                    color: Colors.red
+                  ),
+                )
+              )
+            ]
+          )
         ]
       ),
       floatingActionButton: FloatingActionButton.extended(

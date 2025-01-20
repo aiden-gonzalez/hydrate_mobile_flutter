@@ -4,7 +4,6 @@ import 'package:hydrate_mobile_flutter/src/open_map/open_map_view.dart';
 import 'package:hydrate_mobile_flutter/src/profile/profile_view.dart';
 import 'package:hydrate_mobile_flutter/src/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/settings/settings_view.dart';
-// import 'package:flutter/foundation.dart';
 
 /// Edited flutter code sample for [NavigationBar].
 
@@ -29,7 +28,6 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
           setState(() {
-            // debugPrint("apiKey $apiKey");
             currentPageIndex = index;
           });
         },
