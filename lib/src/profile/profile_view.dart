@@ -13,12 +13,13 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
-  int currentTabIndex = 0;
+  int currentTab = 0;
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 3,
+      initialIndex: currentTab,
       child: Scaffold(
         appBar: AppBar(title: const Text("Profile")),
         body: Column(
@@ -84,7 +85,7 @@ class _ProfileViewState extends State<ProfileView> {
                 bottom: TabBar(
                   onTap: (int index) {
                     setState(() {
-                      currentTabIndex = index;
+                      currentTab = index;
                     });
                   },
                   tabs: [

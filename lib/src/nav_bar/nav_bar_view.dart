@@ -54,16 +54,18 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
           ),
         ],
       ),
-      body: [
-        /// Home page
-        SafeArea(child: MapSample()),
+      body: IndexedStack(
+        index: currentPageIndex,
+        children: [
+          /// Home page
+          SafeArea(child: MapSample()),
 
-        /// Profile page
-        ProfileView(settingsController: widget.controller),
+          /// Profile page
+          ProfileView(settingsController: widget.controller),
 
-        /// Settings page
-        SettingsView(settingsControler: widget.controller)
-      ][currentPageIndex],
+          /// Settings page
+          SettingsView(settingsControler: widget.controller)
+        ]),
     );
   }
 }
