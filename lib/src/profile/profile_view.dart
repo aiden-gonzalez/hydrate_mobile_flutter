@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:hydrate_mobile_flutter/src/settings/settings_controller.dart';
 
-class ProfileView extends StatelessWidget {
+class ProfileView extends StatefulWidget {
   const ProfileView({super.key, required this.settingsController});
 
-  static const routeName = "/profile";
-
   final SettingsController settingsController;
+
+  static const String routeName = "/profile";
+
+  @override
+  State<ProfileView> createState() => _ProfileViewState();
+}
+
+class _ProfileViewState extends State<ProfileView> {
+  int currentTabIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +82,11 @@ class ProfileView extends StatelessWidget {
               height: 50,
               child: AppBar(
                 bottom: TabBar(
+                  onTap: (int index) {
+                    setState(() {
+                      currentTabIndex = index;
+                    });
+                  },
                   tabs: [
                     Tab(
                       icon: Icon(Icons.water_drop),

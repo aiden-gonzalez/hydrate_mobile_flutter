@@ -24,7 +24,6 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     return Scaffold(
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
@@ -55,7 +54,7 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
           ),
         ],
       ),
-      body: <Widget>[
+      body: [
         /// Home page
         SafeArea(child: MapSample()),
 
