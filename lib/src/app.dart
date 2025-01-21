@@ -68,7 +68,7 @@ class MyApp extends StatelessWidget {
               builder: (BuildContext context) {
                 switch (routeSettings.name) {
                   default:
-                    return HydrateNavigation(controller: settingsController);
+                    return HydrateNavigation(settingsController: settingsController);
                 }
               },
             );

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:hydrate_mobile_flutter/src/fob_create/fob_create_view.dart';
+import 'package:hydrate_mobile_flutter/src/fob_detail/fob_detail_view.dart';
+import 'package:hydrate_mobile_flutter/src/settings/settings_controller.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:flutter/foundation.dart';
 
 class OpenMapView extends StatefulWidget {
-  const OpenMapView({super.key});
+  const OpenMapView({super.key, required this.settingsController});
+
+  final SettingsController settingsController;
 
   @override
   State<OpenMapView> createState() => _OpenMapViewState();
@@ -17,12 +21,15 @@ class _OpenMapViewState extends State<OpenMapView> {
     userAgentPackageName: "dev.fleaflet.flutter_map.example",
   );
 
+  final LatLng purdue = LatLng(45, 45);
+  final LatLng fountain = LatLng(45, 45);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FlutterMap(
         options: MapOptions(
-          initialCenter: LatLng(1.28, 103),
+          initialCenter: purdue,
           initialZoom: 11,
           interactionOptions: const InteractionOptions(
             flags: ~InteractiveFlag.doubleTapZoom
@@ -33,13 +40,16 @@ class _OpenMapViewState extends State<OpenMapView> {
           MarkerLayer(
             markers: [
               Marker(
-                point: LatLng(1.286493, 103.860359),
+                point: fountain,
                 width: 50,
                 height: 50,
                 alignment: Alignment.topCenter,
                 child: GestureDetector(
                   onTap: () {
-                    debugPrint("tapped marker");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => FobDetailView(settingsController: widget.settingsController, fobId: "fountain_id_here")),
+                    );
                   },
                   child: Icon(
                     Icons.location_pin,
@@ -52,10 +62,14 @@ class _OpenMapViewState extends State<OpenMapView> {
           )
         ]
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
-        label: const Text('To the lake!'),
-        icon: const Icon(Icons.directions_boat),
+      floatingActionButton: FloatingActionButton.small(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const FobCreateView()),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

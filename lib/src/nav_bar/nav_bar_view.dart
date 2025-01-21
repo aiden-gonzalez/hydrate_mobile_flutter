@@ -8,9 +8,9 @@ import 'package:hydrate_mobile_flutter/src/settings/settings_view.dart';
 /// Edited flutter code sample for [NavigationBar].
 
 class HydrateNavigation extends StatefulWidget {
-  const HydrateNavigation({super.key, required this.controller});
+  const HydrateNavigation({super.key, required this.settingsController});
 
-  final SettingsController controller;
+  final SettingsController settingsController;
 
   @override
   State<HydrateNavigation> createState() => _HydrateNavigationState();
@@ -58,13 +58,13 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
         index: currentPageIndex,
         children: [
           /// Home page
-          SafeArea(child: OpenMapView()),
+          SafeArea(child: OpenMapView(settingsController: widget.settingsController)),
 
           /// Profile page
-          ProfileView(settingsController: widget.controller),
+          ProfileView(settingsController: widget.settingsController),
 
           /// Settings page
-          SettingsView(settingsControler: widget.controller)
+          SettingsView(settingsControler: widget.settingsController)
         ]),
     );
   }
