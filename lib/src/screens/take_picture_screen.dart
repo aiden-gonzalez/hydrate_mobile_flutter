@@ -1,6 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:hydrate_mobile_flutter/src/camera/display_picure_screen.dart';
+import 'package:hydrate_mobile_flutter/src/custom_widgets/display_picure.dart';
 
 // A screen that allows users to take a picture using a given camera.
 class TakePictureScreen extends StatefulWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hydrate_mobile_flutter/src/settings/settings_controller.dart';
+import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key, required this.settingsController});

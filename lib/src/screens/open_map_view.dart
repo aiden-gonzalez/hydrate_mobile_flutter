@@ -1,9 +1,9 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:hydrate_mobile_flutter/src/camera/take_picture_screen.dart';
-import 'package:hydrate_mobile_flutter/src/fob_detail/fob_detail_view.dart';
-import 'package:hydrate_mobile_flutter/src/settings/settings_controller.dart';
+import 'package:hydrate_mobile_flutter/src/screens/take_picture_screen.dart';
+import 'package:hydrate_mobile_flutter/src/screens/fob_detail_view.dart';
+import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 import 'package:latlong2/latlong.dart';
 
 class OpenMapView extends StatefulWidget {

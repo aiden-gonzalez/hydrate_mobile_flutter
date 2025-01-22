@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hydrate_mobile_flutter/src/profile/profile_view.dart';
-import 'package:hydrate_mobile_flutter/src/settings/settings_controller.dart';
+import 'package:hydrate_mobile_flutter/src/screens/profile_view.dart';
+import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 
 class FobDetailView extends StatelessWidget {
   FobDetailView({super.key, required this.settingsController, required this.fobId});
