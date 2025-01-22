@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -10,9 +11,11 @@ class MyApp extends StatelessWidget {
   const MyApp({
     super.key,
     required this.settingsController,
+    required this.camera
   });
 
   final SettingsController settingsController;
+  final CameraDescription camera;
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +71,7 @@ class MyApp extends StatelessWidget {
               builder: (BuildContext context) {
                 switch (routeSettings.name) {
                   default:
-                    return HydrateNavigation(settingsController: settingsController);
+                    return HydrateNavigation(settingsController: settingsController, camera: camera);
                 }
               },
             );

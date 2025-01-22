@@ -1,14 +1,16 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:hydrate_mobile_flutter/src/fob_create/fob_create_view.dart';
+import 'package:hydrate_mobile_flutter/src/camera/take_picture_screen.dart';
 import 'package:hydrate_mobile_flutter/src/fob_detail/fob_detail_view.dart';
 import 'package:hydrate_mobile_flutter/src/settings/settings_controller.dart';
 import 'package:latlong2/latlong.dart';
 
 class OpenMapView extends StatefulWidget {
-  const OpenMapView({super.key, required this.settingsController});
+  const OpenMapView({super.key, required this.settingsController, required this.camera});
 
   final SettingsController settingsController;
+  final CameraDescription camera;
 
   @override
   State<OpenMapView> createState() => _OpenMapViewState();
@@ -65,7 +67,7 @@ class _OpenMapViewState extends State<OpenMapView> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const FobCreateView()),
+            MaterialPageRoute(builder: (context) => TakePictureScreen(camera: widget.camera)),
           );
         },
         child: const Icon(Icons.add),

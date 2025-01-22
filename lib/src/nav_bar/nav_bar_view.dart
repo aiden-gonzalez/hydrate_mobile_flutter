@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrate_mobile_flutter/environment.dart';
 import 'package:hydrate_mobile_flutter/src/open_map/open_map_view.dart';
@@ -8,9 +9,10 @@ import 'package:hydrate_mobile_flutter/src/settings/settings_view.dart';
 /// Edited flutter code sample for [NavigationBar].
 
 class HydrateNavigation extends StatefulWidget {
-  const HydrateNavigation({super.key, required this.settingsController});
+  const HydrateNavigation({super.key, required this.settingsController, required this.camera});
 
   final SettingsController settingsController;
+  final CameraDescription camera;
 
   @override
   State<HydrateNavigation> createState() => _HydrateNavigationState();
@@ -58,7 +60,7 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
         index: currentPageIndex,
         children: [
           /// Home page
-          SafeArea(child: OpenMapView(settingsController: widget.settingsController)),
+          SafeArea(child: OpenMapView(settingsController: widget.settingsController, camera: widget.camera)),
 
           /// Profile page
           ProfileView(settingsController: widget.settingsController),
