@@ -27,50 +27,52 @@ class _OpenMapViewState extends State<OpenMapView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: FlutterMap(
-        options: MapOptions(
-          initialCenter: purdue,
-          initialZoom: 17,
-          interactionOptions: const InteractionOptions(
-            flags: ~InteractiveFlag.doubleTapZoom
-          )
-        ),
-        children: [
-          openStreetMapTileLayer,
-          MarkerLayer(
-            markers: [
-              Marker(
-                point: purdue,
-                width: 50,
-                height: 50,
-                alignment: Alignment.topCenter,
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => FobDetailView(settingsController: widget.settingsController, fobId: "fountain_id_here")),
-                    );
-                  },
-                  child: Icon(
-                    Icons.location_pin,
-                    size: 50,
-                    color: Colors.red
-                  ),
+    return SafeArea(
+      child: Scaffold(
+        body: FlutterMap(
+          options: MapOptions(
+            initialCenter: purdue,
+            initialZoom: 17,
+            interactionOptions: const InteractionOptions(
+              flags: ~InteractiveFlag.doubleTapZoom
+            )
+          ),
+          children: [
+            openStreetMapTileLayer,
+            MarkerLayer(
+              markers: [
+                Marker(
+                  point: purdue,
+                  width: 50,
+                  height: 50,
+                  alignment: Alignment.topCenter,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => FobDetailView(settingsController: widget.settingsController, fobId: "fountain_id_here")),
+                      );
+                    },
+                    child: Icon(
+                      Icons.location_pin,
+                      size: 50,
+                      color: Colors.red
+                    ),
+                  )
                 )
-              )
-            ]
-          )
-        ]
-      ),
-      floatingActionButton: FloatingActionButton.small(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => TakePictureScreen(camera: widget.camera)),
-          );
-        },
-        child: const Icon(Icons.add),
+              ]
+            )
+          ]
+        ),
+        floatingActionButton: FloatingActionButton.small(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => TakePictureScreen(camera: widget.camera)),
+            );
+          },
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }

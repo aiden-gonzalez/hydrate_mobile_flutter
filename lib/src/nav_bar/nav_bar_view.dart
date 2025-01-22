@@ -60,7 +60,7 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
         index: currentPageIndex,
         children: [
           /// Home page
-          SafeArea(child: OpenMapView(settingsController: widget.settingsController, camera: widget.camera)),
+          OpenMapView(settingsController: widget.settingsController, camera: widget.camera),
 
           /// Profile page
           ProfileView(settingsController: widget.settingsController),
