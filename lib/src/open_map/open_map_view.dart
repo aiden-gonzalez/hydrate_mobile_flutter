@@ -20,9 +20,8 @@ class _OpenMapViewState extends State<OpenMapView> {
     urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     userAgentPackageName: "dev.fleaflet.flutter_map.example",
   );
-
-  final LatLng purdue = LatLng(45, 45);
-  final LatLng fountain = LatLng(45, 45);
+  
+  final LatLng purdue = LatLng(40.429052, -86.913124);
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +29,7 @@ class _OpenMapViewState extends State<OpenMapView> {
       body: FlutterMap(
         options: MapOptions(
           initialCenter: purdue,
-          initialZoom: 11,
+          initialZoom: 17,
           interactionOptions: const InteractionOptions(
             flags: ~InteractiveFlag.doubleTapZoom
           )
@@ -40,7 +39,7 @@ class _OpenMapViewState extends State<OpenMapView> {
           MarkerLayer(
             markers: [
               Marker(
-                point: fountain,
+                point: purdue,
                 width: 50,
                 height: 50,
                 alignment: Alignment.topCenter,
