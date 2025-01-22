@@ -14,9 +14,15 @@ void main() async {
   final cameras = await availableCameras();
 
   // Get a specific camera from the list of available cameras.
-  final firstCamera = cameras.first;
-
-  debugPrint(firstCamera.toString());
+  CameraDescription? selectedCamera;
+  final backCameras = cameras.where((CameraDescription cam) => cam.lensDirection == CameraLensDirection.back).toList();
+  // If there are any back cameras available, take the first
+  if (backCameras.isEmpty) {
+    selectedCamera = cameras.first;
+  } else {
+    // Otherwise default to the first camera
+    selectedCamera = backCameras.first;
+  }
 
   // Set up the SettingsController, which will glue user settings to multiple
   // Flutter Widgets.
@@ -29,5 +35,5 @@ void main() async {
   // Run the app and pass in the SettingsController. The app listens to the
   // SettingsController for changes, then passes it further down to the
   // SettingsView.
-  runApp(MyApp(settingsController: settingsController, camera: firstCamera));
+  runApp(MyApp(settingsController: settingsController, camera: selectedCamera));
 }
