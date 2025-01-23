@@ -1,7 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:hydrate_mobile_flutter/src/screens/take_picture_screen.dart';
+import 'package:hydrate_mobile_flutter/src/screens/fob_create_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/fob_detail_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 import 'package:latlong2/latlong.dart';
@@ -64,14 +64,15 @@ class _OpenMapViewState extends State<OpenMapView> {
             )
           ]
         ),
-        floatingActionButton: FloatingActionButton.small(
+        floatingActionButton: FloatingActionButton.extended(
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => TakePictureScreen(camera: widget.camera)),
+              MaterialPageRoute(builder: (context) => FobCreateView(camera: widget.camera)),
             );
           },
-          child: const Icon(Icons.add),
+          label: const Text("Contribute"),
+          icon: const Icon(Icons.add),
         ),
       ),
     );
