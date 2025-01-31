@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
@@ -11,68 +13,198 @@ class FobCreateView extends StatefulWidget {
 }
 
 class _FobCreateViewState extends State<FobCreateView> {
-  final List<bool> _selectedType = [true, false];
+  final List<bool> _selectedFobType = [true, false];
+
+  // Create a global key that uniquely identifies the Form widget and allows validation of the form
+  final _formKey = GlobalKey<FormState>();
+
+  final String fountainLabel = "Fountain";
+  final String bathroomLabel = "Bathroom";
+
+  // String fields
+  String name = "";
+  String description = "";
+  String gender = "Male";
+
+  // Checkboxes
+  bool hasBottleFiller = false;
+  bool hasPeriodProducts = false;
+  bool hasBabyChanger = false;
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> types = [
-      Text("Fountain", style: Theme.of(context).textTheme.titleMedium),
-      Text("Bathroom", style: Theme.of(context).textTheme.titleMedium)
+    final List<Text> types = [
+      Text(fountainLabel, style: Theme.of(context).textTheme.titleMedium),
+      Text(bathroomLabel, style: Theme.of(context).textTheme.titleMedium)
     ];
 
-    return Scaffold(
-        appBar: AppBar(title: const Text('Contribute')),
-        body: SingleChildScrollView(
-            child: Center(
-          child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(height: 5),
-                // Single select for FoB type
-                ToggleButtons(
-                    direction: Axis.horizontal,
-                    onPressed: (int index) {
-                      setState(() {
-                        // The button that is tapped is set to true, and the others to false.
-                        for (int i = 0; i < _selectedType.length; i++) {
-                          _selectedType[i] = i == index;
-                        }
-                      });
-                    },
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    // selectedBorderColor: Colors.red[700],
-                    // selectedColor: Colors.white,
-                    // fillColor: Colors.red[200],
-                    // color: Colors.red[400],
-                    constraints: BoxConstraints(
-                        minHeight: 50.0,
-                        minWidth: (MediaQuery.of(context).size.width) / 3),
-                    isSelected: _selectedType,
-                    children: types),
-                // Add picture
-                Padding(
-                  padding: EdgeInsets.all(10.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10.0),
-                        color: Theme.of(context).highlightColor),
-                    child: InkWell(
-                      onTap: () {
-                        debugPrint("Tapped inkwell");
+    bool isFountain() {
+      return types[_selectedFobType.indexOf(true)].data == fountainLabel;
+    }
+
+    return SafeArea(
+      top: false,
+      child: Scaffold(
+          appBar: AppBar(title: const Text('Contribute')),
+          body: SingleChildScrollView(
+              child: Center(
+            child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(height: 5),
+                  // Single select for FoB type
+                  ToggleButtons(
+                      direction: Axis.horizontal,
+                      onPressed: (int index) {
+                        setState(() {
+                          // The button that is tapped is set to true, and the others to false.
+                          for (int i = 0; i < _selectedFobType.length; i++) {
+                            _selectedFobType[i] = i == index;
+                          }
+                        });
                       },
-                      child: SizedBox(
-                          width: double.infinity,
-                          height: 300,
-                          child: Center(
-                              child: Text("Tap to take photo...",
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineSmall))),
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                      constraints: BoxConstraints(
+                          minHeight: 50.0,
+                          minWidth: (MediaQuery.of(context).size.width) / 3),
+                      isSelected: _selectedFobType,
+                      children: types),
+                  SizedBox(height: 10),
+                  // Add picture
+                  Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10.0),
+                          color: Theme.of(context).highlightColor),
+                      child: InkWell(
+                        onTap: () {
+                          debugPrint("Tapped inkwell");
+                        },
+                        child: SizedBox(
+                            width: double.infinity,
+                            height: 300,
+                            child: Center(
+                                child: Text("Tap to take photo...",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall))),
+                      ),
                     ),
                   ),
-                )
-              ]),
-        )));
+                  // Form for entering fob information
+                  Form(
+                      key: _formKey,
+                      child: Column(spacing: 10, children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: TextFormField(
+                              decoration: InputDecoration(labelText: "Name"),
+                              onChanged: (value) {
+                                setState(() => name = value);
+                              },
+                              // The validator receives the text that the user has entered.
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter a name';
+                                }
+                                return null;
+                              }),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: TextFormField(
+                              decoration:
+                                  InputDecoration(labelText: "Description"),
+                              minLines: 2,
+                              maxLines: 3,
+                              onChanged: (value) {
+                                setState(() => description = value);
+                              },
+                              // The validator receives the text that the user has entered.
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter a description';
+                                }
+                                return null;
+                              }),
+                        ),
+                        if (isFountain())
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            child: CheckboxListTile(
+                                title: const Text("Has Bottle Filler"),
+                                value: hasBottleFiller,
+                                onChanged: (bool? value) {
+                                  setState(() => hasBottleFiller = value!);
+                                },
+                                secondary: const Icon(Icons.water_drop)),
+                          ),
+                        if (!isFountain())
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            child: DropdownButtonFormField<String>(
+                              value: gender,
+                              decoration: InputDecoration(labelText: 'Gender'),
+                              onChanged: (value) {
+                                setState(() {
+                                  gender = value!;
+                                });
+                              },
+                              items: ['Male', 'Female', 'All Gender']
+                                  .map((label) => DropdownMenuItem(
+                                        value: label,
+                                        child: Text(label),
+                                      ))
+                                  .toList(),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please select a gender';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        if (!isFountain())
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            child: CheckboxListTile(
+                                title: Text('Period Products Available'),
+                                value: hasPeriodProducts,
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    hasPeriodProducts = value!;
+                                  });
+                                },
+                                secondary: Icon(Icons.spa)),
+                          ),
+                        if (!isFountain())
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            child: CheckboxListTile(
+                                title: Text('Baby Changer Available'),
+                                value: hasBabyChanger,
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    hasBabyChanger = value!;
+                                  });
+                                },
+                                secondary: Icon(Icons.baby_changing_station)),
+                          ),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              // Handle form submission, e.g., save the data
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Processing Data')));
+                            }
+                          },
+                          child: Text('Submit'),
+                        )
+                      ]))
+                ]),
+          ))),
+    );
   }
 }
