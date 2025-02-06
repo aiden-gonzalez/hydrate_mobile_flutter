@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:hydrate_mobile_flutter/src/screens/take_picture_screen.dart';
 
 class FobCreateView extends StatefulWidget {
   const FobCreateView({super.key, required this.camera});
@@ -30,6 +32,9 @@ class _FobCreateViewState extends State<FobCreateView> {
   bool hasBottleFiller = false;
   bool hasPeriodProducts = false;
   bool hasBabyChanger = false;
+
+  // Image path
+  String? imagePath;
 
   @override
   Widget build(BuildContext context) {
@@ -66,8 +71,7 @@ class _FobCreateViewState extends State<FobCreateView> {
                       },
                       borderRadius: const BorderRadius.all(Radius.circular(8)),
                       constraints: BoxConstraints(
-                          minHeight: 50.0,
-                          minWidth: (MediaQuery.of(context).size.width) / 3),
+                          minHeight: 50.0, minWidth: (MediaQuery.of(context).size.width) / 3),
                       isSelected: _selectedFobType,
                       children: types),
                   SizedBox(height: 10),
@@ -75,23 +79,31 @@ class _FobCreateViewState extends State<FobCreateView> {
                   Padding(
                     padding: EdgeInsets.all(10.0),
                     child: Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10.0),
-                          color: Theme.of(context).highlightColor),
-                      child: InkWell(
-                        onTap: () {
-                          debugPrint("Tapped inkwell");
-                        },
-                        child: SizedBox(
-                            width: double.infinity,
-                            height: 300,
-                            child: Center(
-                                child: Text("Tap to take photo...",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall))),
-                      ),
-                    ),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.0),
+                            color: Theme.of(context).highlightColor),
+                        child: imagePath == null
+                            ? InkWell(
+                                onTap: () async {
+                                  final picture = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            TakePictureScreen(camera: widget.camera)),
+                                  );
+                                  debugPrint(picture);
+                                  setState(() {
+                                    imagePath = picture;
+                                  });
+                                },
+                                child: SizedBox(
+                                    width: double.infinity,
+                                    height: 300,
+                                    child: Center(
+                                        child: Text("Tap to take photo...",
+                                            style: Theme.of(context).textTheme.headlineSmall))),
+                              )
+                            : Image.file(File(imagePath!))),
                   ),
                   // Form for entering fob information
                   Form(
@@ -115,8 +127,7 @@ class _FobCreateViewState extends State<FobCreateView> {
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 20),
                           child: TextFormField(
-                              decoration:
-                                  InputDecoration(labelText: "Description"),
+                              decoration: InputDecoration(labelText: "Description"),
                               minLines: 2,
                               maxLines: 3,
                               onChanged: (value) {
@@ -196,8 +207,8 @@ class _FobCreateViewState extends State<FobCreateView> {
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
                               // Handle form submission, e.g., save the data
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Processing Data')));
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(content: Text('Processing Data')));
                             }
                           },
                           child: Text('Submit'),
