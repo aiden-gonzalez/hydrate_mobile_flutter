@@ -18,6 +18,7 @@ class TakePictureScreen extends StatefulWidget {
 class TakePictureScreenState extends State<TakePictureScreen> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
+  late bool _flashEnabled;
 
   @override
   void initState() {
@@ -33,6 +34,9 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
     // Next, initialize the controller. This returns a Future.
     _initializeControllerFuture = _controller.initialize();
+
+    // Default to flash off
+    _flashEnabled = false;
   }
 
   @override
@@ -68,18 +72,34 @@ class TakePictureScreenState extends State<TakePictureScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Flash toggle button
               FloatingActionButton(
                 onPressed: () {
-
+                  if (_flashEnabled) {
+                    _controller.setFlashMode(FlashMode.off);
+                    setState(() {
+                      _flashEnabled = false;
+                    });
+                  } else {
+                    _controller.setFlashMode(FlashMode.always);
+                    setState(() {
+                      _flashEnabled = true;
+                    });
+                  }
                 },
-                child: const Icon(Icons.flash_on)
+                child: _flashEnabled ? const Icon(Icons.flash_on) : const Icon(Icons.flash_off)
               ),
+              // Take picture button
               FloatingActionButton.extended(
                 // Provide an onPressed callback.
                 onPressed: () async {
                   // Take the Picture in a try / catch block. If anything goes wrong,
                   // catch the error.
                   try {
+                    // Indicate photo capturing...
+                    ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(content: Text('Taking photo...')));
+
                     // Ensure that the camera is initialized.
                     await _initializeControllerFuture;
             

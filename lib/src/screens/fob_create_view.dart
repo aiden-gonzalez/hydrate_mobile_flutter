@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrate_mobile_flutter/src/screens/take_picture_screen.dart';
+import 'package:image_picker/image_picker.dart';
 
 class FobCreateView extends StatefulWidget {
   const FobCreateView({super.key, required this.camera});
@@ -47,6 +48,8 @@ class _FobCreateViewState extends State<FobCreateView> {
       return types[_selectedFobType.indexOf(true)].data == fountainLabel;
     }
 
+    final ImagePicker picker = ImagePicker();
+
     return SafeArea(
       top: false,
       child: Scaffold(
@@ -83,27 +86,49 @@ class _FobCreateViewState extends State<FobCreateView> {
                             borderRadius: BorderRadius.circular(10.0),
                             color: Theme.of(context).highlightColor),
                         child: imagePath == null
-                            ? InkWell(
-                                onTap: () async {
-                                  final picture = await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            TakePictureScreen(camera: widget.camera)),
-                                  );
-                                  debugPrint(picture);
-                                  setState(() {
-                                    imagePath = picture;
-                                  });
-                                },
-                                child: SizedBox(
+                            ? Column(
+                              children: [
+                                InkWell(
+                                  onTap: () async {
+                                    final picture = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              TakePictureScreen(camera: widget.camera)),
+                                    );
+                                    debugPrint(picture);
+                                    setState(() {
+                                      imagePath = picture;
+                                    });
+                                  },
+                                  child: SizedBox(
+                                      width: double.infinity,
+                                      height: 200,
+                                      child: Center(
+                                          child: Text("Tap to take photo...",
+                                              style: Theme.of(context).textTheme.headlineSmall))),
+                                ),
+                                Divider(),
+                                InkWell(
+                                  onTap: () async {
+                                    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+                                    setState(() {
+                                      imagePath = pickedImage?.path;
+                                    });
+                                  },
+                                  child: SizedBox(
                                     width: double.infinity,
-                                    height: 300,
+                                    height: 150,
                                     child: Center(
-                                        child: Text("Tap to take photo...",
-                                            style: Theme.of(context).textTheme.headlineSmall))),
-                              )
-                            : Image.file(File(imagePath!))),
+                                      child: Text("Tap to select from gallery...",
+                                      style: Theme.of(context).textTheme.headlineSmall)
+                                    )
+                                  )
+                                )
+                                ],
+                            )
+                            : Image.file(File(imagePath!),
+                            height: 450)),
                   ),
                   // Form for entering fob information
                   Form(

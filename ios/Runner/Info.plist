@@ -35,6 +35,10 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Need photo library usage for adding photos to your contributions</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Need camera usage for adding photos to your contributions</string>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
