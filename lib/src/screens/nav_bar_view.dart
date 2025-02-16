@@ -1,6 +1,5 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:hydrate_mobile_flutter/environment.dart';
 import 'package:hydrate_mobile_flutter/src/screens/open_map_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/profile_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
@@ -20,9 +19,6 @@ class HydrateNavigation extends StatefulWidget {
 
 class _HydrateNavigationState extends State<HydrateNavigation> {
   int currentPageIndex = 0;
-
-  // Example of accessing environment variables
-  String backendApiUrl = Environment.backendApiUrl;
 
   @override
   Widget build(BuildContext context) {

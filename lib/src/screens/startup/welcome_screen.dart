@@ -15,6 +15,8 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO set up PopScope to prevent going back to this page when signed in?
+    // https://api.flutter.dev/flutter/widgets/PopScope-class.html
     return SafeArea(
       child: Scaffold(
         body: Padding(
@@ -52,7 +54,7 @@ class WelcomeScreen extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      LoginScreen(camera: camera)),
+                                      LoginScreen(settingsController: settingsController, camera: camera)),
                             );
                           },
                         ),
@@ -70,7 +72,7 @@ class WelcomeScreen extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      SignupScreen(camera: camera)),
+                                      SignupScreen(settingsController: settingsController, camera: camera)),
                             );
                           },
                         ),
