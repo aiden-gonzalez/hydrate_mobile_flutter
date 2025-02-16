@@ -22,7 +22,7 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
   int currentPageIndex = 0;
 
   // Example of accessing environment variables
-  String apiKey = Environment.googleMapsKey;
+  String backendApiUrl = Environment.backendApiUrl;
 
   @override
   Widget build(BuildContext context) {
