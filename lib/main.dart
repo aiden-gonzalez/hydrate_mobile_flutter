@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_zustand/flutter_zustand.dart';
 
 import 'src/app.dart';
 import 'src/screens/settings/settings_controller.dart';
@@ -37,5 +38,12 @@ void main() async {
   // Run the app and pass in the SettingsController. The app listens to the
   // SettingsController for changes, then passes it further down to the
   // SettingsView.
-  runApp(MyApp(settingsController: settingsController, camera: selectedCamera));
+  runApp(
+    StoreScope(
+      child: MyApp(
+        settingsController: settingsController,
+        camera: selectedCamera
+      )
+    )
+  );
 }
