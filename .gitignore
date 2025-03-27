@@ -49,3 +49,6 @@ app.*.map.json
 
 # HydRate Backend API spec
 hydRate.json
+
+# Cxx folder
+/android/app/.cxx
