@@ -9,9 +9,15 @@ Future<http.Response> login(String email, String password) {
   return postRequest("auth", null, request);
 }
 
-Future<http.Response> postRequest(String path, String? token, Object? bodyToEncode) {
+Future<http.Response> postRequest(
+    String path, String? token, Object? bodyToEncode) {
   String jsonBody = jsonEncode(bodyToEncode);
-  return http.post(Uri.parse("${Environment.backendApiUrl}/api/$path"),
-      headers: <String, String>{'Content-Type': 'application/json', 'Authorization': token ?? ""},
+  Uri uri = Uri.parse("${Environment.backendApiUrl()}/api/$path");
+  debugPrint(uri.toString());
+  return http.post(uri,
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': token ?? ""
+      },
       body: jsonBody);
 }
