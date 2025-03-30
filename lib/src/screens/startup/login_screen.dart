@@ -12,6 +12,7 @@ import 'package:hydrate_mobile_flutter/src/screens/nav_bar_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/utils/api.dart' as api;
 import 'package:hydrate_mobile_flutter/src/utils/stores.dart';
+import 'package:hydrate_mobile_flutter/src/utils/toast.dart' as toast;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.settingsController, required this.camera});
@@ -72,7 +73,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           try {
                             Response res = await api.login(email, password);
                             if (res.statusCode == 200) {
-                              useTokenStore().setTokens(res as AuthSuccessResponse);
+                              // TODO Fix decoding of response here
+                              useTokenStore().setTokens(res.body as AuthSuccessResponse);
                               Navigator.pushAndRemoveUntil(
                                   context,
                                   MaterialPageRoute(
@@ -85,16 +87,23 @@ class _LoginScreenState extends State<LoginScreen> {
                             }
                           } catch (e) {
                             debugPrint("Error logging in: $e");
-                            // TODO display error message
+                            toast.showToast(context, e.toString());
                           }
                         }),
                     CustomAlertButton(
                         buttonText: "Forgot password?",
                         alertTitle: "Reset password?",
                         alertDescription: "Confirm to send password reset email",
-                        dialogResponseHandler: (choice) {
-                          debugPrint("RESPONSE HANDLER: RECEIVED CHOICE FROM DIALOG");
-                          debugPrint(choice);
+                        dialogResponseHandler: (choice) async {
+                          if (choice == "Ok") {
+                            try {
+                              await api.sendPasswordResetEmail(email);
+                              toast.showToast(context, "Password reset email sent successfully.");
+                            } catch (e) {
+                              debugPrint("Error sending password reset email: $e");
+                              toast.showToast(context, "Failed to send password reset email.");
+                            }
+                          }
                         })
                   ],
                 ),

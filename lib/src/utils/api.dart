@@ -9,6 +9,22 @@ Future<http.Response> login(String email, String password) {
   return postRequest("auth", null, request);
 }
 
+Future<http.Response> signup(String username, String email, String password) {
+  SignupRequest request = SignupRequest(
+    username: username,
+    authRequest: AuthRequest(
+      email: email,
+      password: password
+    )
+  );
+  return postRequest("signup", null, request);
+}
+
+Future<http.Response> sendPasswordResetEmail(String email) {
+  Map<String, String> request = {'email': email};
+  return postRequest("password-reset", null, request);
+}
+
 Future<http.Response> postRequest(
     String path, String? token, Object? bodyToEncode) {
   String jsonBody = jsonEncode(bodyToEncode);

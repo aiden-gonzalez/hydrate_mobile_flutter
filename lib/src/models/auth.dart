@@ -5,8 +5,20 @@ class AuthRequest {
   const AuthRequest({required this.email, required this.password});
 
   Map<String, dynamic> toJson() => {
-        'user_credentials': {'email': email, 'password': password}
-      };
+    'user_credentials': {'email': email, 'password': password}
+  };
+}
+
+class SignupRequest {
+  final String username;
+  final AuthRequest authRequest;
+
+  const SignupRequest({required this.username, required this.authRequest});
+  
+  Map<String, dynamic> toJson() => {
+    'username': username,
+    'user_credentials': authRequest.toJson()['user_credentials']
+  };
 }
 
 class AuthSuccessResponse {
