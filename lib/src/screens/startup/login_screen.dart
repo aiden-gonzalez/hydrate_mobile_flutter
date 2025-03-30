@@ -22,8 +22,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  late String email;
-  late String password;
+  late String email = "";
+  late String password = "";
   bool failure = false;
 
   @override
@@ -66,23 +66,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     CustomButton(
                         buttonText: 'Login',
                         onPressed: () async {
-                          // TODO Is this necessary?
                           if (email.isEmpty || password.isEmpty) {
                             toast.showToast(context, "Please fill in all fields.");
                             return;
                           }
-                          final tokens = await AuthService.login(context, email, password);
-                          if (tokens == null) {
-                            return;
-                          }
-                          
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => HydrateNavigation(
-                                    settingsController: widget.settingsController,
-                                    camera: widget.camera)),
-                            (Route<dynamic> route) => false);
+                          await AuthService.login(context, email, password);
+                          // Welcome screen binding will handle navigation
                         }),
                     CustomAlertButton(
                         buttonText: "Forgot password?",

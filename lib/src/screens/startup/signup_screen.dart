@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:hydrate_mobile_flutter/src/custom_widgets/custom_button.dart';
 import 'package:hydrate_mobile_flutter/src/custom_widgets/custom_text_field.dart';
 import 'package:hydrate_mobile_flutter/src/custom_widgets/screen_title.dart';
-import 'package:hydrate_mobile_flutter/src/screens/nav_bar_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
-import 'package:http/http.dart';
-import 'package:hydrate_mobile_flutter/src/utils/api.dart' as api;
+import 'package:hydrate_mobile_flutter/src/utils/auth.dart';
 import 'package:hydrate_mobile_flutter/src/utils/toast.dart' as toast;
 
 class SignupScreen extends StatefulWidget {
@@ -20,9 +18,9 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  late String username;
-  late String email;
-  late String password;
+  late String username = "";
+  late String email = "";
+  late String password = "";
 
   @override
   Widget build(BuildContext context) {
@@ -81,26 +79,12 @@ class _SignupScreenState extends State<SignupScreen> {
                     CustomButton(
                       buttonText: 'Signup',
                       onPressed: () async {
-                        try {
-                          Response res = await api.signup(username, email, password);
-                          if (res.statusCode == 200) {
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => HydrateNavigation(
-                                  settingsController: widget.settingsController,
-                                  camera: widget.camera,
-                                ),
-                              ),
-                              (Route<dynamic> route) => false,
-                            );
-                          } else {
-                            throw Exception(res.body);
-                          }
-                        } catch (e) {
-                          debugPrint("Error signing up: $e");
-                          toast.showToast(context, e.toString());
+                        if (username.isEmpty || email.isEmpty || password.isEmpty) {
+                          toast.showToast(context, "Please fill in all fields.");
+                          return;
                         }
+                        await AuthService.signup(context, username, email, password);
+                        // Welcome screen binding will handle navigation
                       },
                     ),
                     CustomButton(

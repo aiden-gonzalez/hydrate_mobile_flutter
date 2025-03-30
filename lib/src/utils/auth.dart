@@ -1,16 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_zustand/flutter_zustand.dart';
 import 'package:hydrate_mobile_flutter/src/models/auth.dart';
 import 'package:hydrate_mobile_flutter/src/utils/api.dart' as api;
 import 'package:hydrate_mobile_flutter/src/utils/stores.dart';
 import 'package:hydrate_mobile_flutter/src/utils/toast.dart' as toast;
 
 class AuthService {
-  static Future<AuthSuccessResponse> getStoredTokens(BuildContext context) async {
-    return useTokenStore().select(context, (state) => state);
-  }
-
   static Future<AuthSuccessResponse?> login(BuildContext context, String email, String password) async {
     try {
       final response = await api.login(email, password);
@@ -28,16 +23,19 @@ class AuthService {
     }
   }
 
-  static Future<AuthSuccessResponse?> signup(String username, String email, String password) async {
+  static Future<AuthSuccessResponse?> signup(BuildContext context, String username, String email, String password) async {
     try {
       final response = await api.signup(username, email, password);
-      if (response.statusCode == 200) {
-        final tokens = AuthSuccessResponse.fromJson(jsonDecode(response.body));
-        useTokenStore().setTokens(tokens);
-        return tokens;
-      } else {
-        throw Exception("Failed to signup");
+      if (response.statusCode != 200) {
+        throw Exception(response.body);
       }
+      final authResponse = await api.login(email, password);
+      if (authResponse.statusCode != 200) {
+        throw Exception(authResponse.body);
+      }
+      final tokens = AuthSuccessResponse.fromJson(jsonDecode(authResponse.body));
+      useTokenStore().setTokens(tokens);
+      return tokens;
     } catch (e) {
       debugPrint("Error signing up: $e");
       return null;
