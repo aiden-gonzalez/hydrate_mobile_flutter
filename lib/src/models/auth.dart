@@ -68,6 +68,7 @@ class AuthSuccessResponse {
 
   bool get isExpired {
     final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    // TODO on backend, need to make expires be a timestamp, not a duration
     return expires > now;
   }
 

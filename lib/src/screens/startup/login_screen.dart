@@ -5,7 +5,6 @@ import 'package:hydrate_mobile_flutter/src/custom_widgets/custom_button.dart';
 import 'package:hydrate_mobile_flutter/src/custom_widgets/custom_text_field.dart';
 import 'package:hydrate_mobile_flutter/src/custom_widgets/screen_title.dart';
 import 'package:hydrate_mobile_flutter/src/custom_widgets/top_screen_image.dart';
-import 'package:hydrate_mobile_flutter/src/screens/nav_bar_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/utils/api.dart' as api;
 import 'package:hydrate_mobile_flutter/src/utils/toast.dart' as toast;
