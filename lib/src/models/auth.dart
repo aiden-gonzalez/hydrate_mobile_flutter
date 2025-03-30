@@ -47,6 +47,14 @@ class AuthSuccessResponse {
       required this.expires,
       required this.username});
 
+  Map<String, dynamic> toJson() => {
+    'access_token': accessToken,
+    'refresh_token': refreshToken,
+    'token_type': tokenType,
+    'expires': expires,
+    'username': username
+  };
+
   factory AuthSuccessResponse.fromJson(Map<String, dynamic> json) {
     return switch (json) {
       {

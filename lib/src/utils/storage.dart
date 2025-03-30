@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hydrate_mobile_flutter/src/models/auth.dart';
 
 FlutterSecureStorage getConfiguredStorage () {
   return FlutterSecureStorage(
@@ -6,6 +9,21 @@ FlutterSecureStorage getConfiguredStorage () {
       encryptedSharedPreferences: true,
     )
   );
+}
+
+const String tokenKey = "token";
+
+Future<void> writeTokens(FlutterSecureStorage storage, AuthSuccessResponse tokens) async {
+  await storage.write(key: tokenKey, value: tokens.toJson().toString());
+}
+
+Future<AuthSuccessResponse?> readTokens(FlutterSecureStorage storage) async {
+  final String? tokenString = await storage.read(key: tokenKey);
+  return tokenString == null ? null : AuthSuccessResponse.fromJson(jsonDecode(tokenString));
+}
+
+Future<void> clearTokens(FlutterSecureStorage storage) async {
+  await storage.delete(key: tokenKey);
 }
 
 Future<void> writeValue(FlutterSecureStorage storage, String key, String value) async {
