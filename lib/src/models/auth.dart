@@ -21,6 +21,18 @@ class SignupRequest {
   };
 }
 
+class RefreshRequest {
+  final String refreshToken;
+  final String expiredToken;
+
+  const RefreshRequest({required this.refreshToken, required this.expiredToken});
+
+  Map<String, dynamic> toJson() => {
+    'refresh_token': refreshToken,
+    'expired_token': expiredToken
+  };
+}
+
 class AuthSuccessResponse {
   final String accessToken;
   final String refreshToken;
@@ -38,9 +50,9 @@ class AuthSuccessResponse {
   factory AuthSuccessResponse.fromJson(Map<String, dynamic> json) {
     return switch (json) {
       {
-        'accessToken': String accessToken,
-        'refreshToken': String refreshToken,
-        'tokenType': String tokenType,
+        'access_token': String accessToken,
+        'refresh_token': String refreshToken,
+        'token_type': String tokenType,
         'expires': int expires,
         'username': String username
       } =>
@@ -52,5 +64,14 @@ class AuthSuccessResponse {
             username: username),
       _ => throw const FormatException('Failed to decode JSON AuthSuccessResponse!')
     };
+  }
+
+  bool get isExpired {
+    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    return expires > now;
+  }
+
+  bool get isEmpty {
+    return accessToken.isEmpty && refreshToken.isEmpty && tokenType.isEmpty && expires == 0 && username.isEmpty;
   }
 }
