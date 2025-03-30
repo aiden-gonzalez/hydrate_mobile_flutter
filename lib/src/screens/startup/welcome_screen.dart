@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:hydrate_mobile_flutter/src/custom_widgets/custom_button.dart';
 import 'package:hydrate_mobile_flutter/src/custom_widgets/screen_title.dart';
 import 'package:hydrate_mobile_flutter/src/custom_widgets/top_screen_image.dart';
+import 'package:hydrate_mobile_flutter/src/screens/nav_bar_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/screens/startup/login_screen.dart';
 import 'package:hydrate_mobile_flutter/src/screens/startup/signup_screen.dart';
+import 'package:hydrate_mobile_flutter/src/models/auth.dart';
+import 'package:hydrate_mobile_flutter/src/utils/auth.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key, required this.settingsController, required this.camera});
@@ -13,10 +16,35 @@ class WelcomeScreen extends StatelessWidget {
   final SettingsController settingsController;
   final CameraDescription camera;
 
+  Future<void> _checkAndNavigate(BuildContext context) async {
+    AuthSuccessResponse storedTokens = await AuthService.getStoredTokens(context);
+
+    // If no tokens, stop now
+    if (storedTokens.isEmpty) {
+      return;
+    }
+
+    // If token expired, try to refresh
+    if (storedTokens.isExpired) {
+      final newTokens = await AuthService.refreshToken(storedTokens.refreshToken, storedTokens.accessToken);
+      if (newTokens == null) {
+        return;
+      }
+    }
+
+    // Tokens acquired, navigate to the main screen
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+          builder: (context) => HydrateNavigation(
+              settingsController: settingsController,
+              camera: camera)),
+      (Route<dynamic> route) => false);
+  }
+
   @override
   Widget build(BuildContext context) {
-    // TODO set up PopScope to prevent going back to this page when signed in?
-    // https://api.flutter.dev/flutter/widgets/PopScope-class.html
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkAndNavigate(context));
     return SafeArea(
       child: Scaffold(
         body: Padding(

@@ -20,6 +20,15 @@ Future<http.Response> signup(String username, String email, String password) {
   return postRequest("signup", null, request);
 }
 
+Future<http.Response> refreshToken(String refreshToken, String expiredToken) {
+  RefreshRequest request = RefreshRequest(
+    refreshToken: refreshToken,
+    expiredToken: expiredToken
+  );
+  return postRequest("auth/refresh", null, request);
+}
+
+// TODO implement this endpoint in the backend
 Future<http.Response> sendPasswordResetEmail(String email) {
   Map<String, String> request = {'email': email};
   return postRequest("password-reset", null, request);
