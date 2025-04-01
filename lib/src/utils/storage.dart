@@ -14,7 +14,7 @@ FlutterSecureStorage getConfiguredStorage () {
 const String tokenKey = "token";
 
 Future<void> writeTokens(FlutterSecureStorage storage, AuthSuccessResponse tokens) async {
-  await storage.write(key: tokenKey, value: tokens.toJson().toString());
+  await storage.write(key: tokenKey, value: jsonEncode(tokens));
 }
 
 Future<AuthSuccessResponse?> readTokens(FlutterSecureStorage storage) async {
