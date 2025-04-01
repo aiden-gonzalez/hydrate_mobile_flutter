@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hydrate_mobile_flutter/src/utils/auth.dart';
 
 import 'settings_controller.dart';
 
@@ -21,28 +22,46 @@ class SettingsView extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        // Glue the SettingsController to the theme selection DropdownButton.
-        //
-        // When a user selects a theme from the dropdown list, the
-        // SettingsController is updated, which rebuilds the MaterialApp.
-        child: DropdownButton<ThemeMode>(
-          // Read the selected themeMode from the controller
-          value: settingsControler.themeMode,
-          // Call the updateThemeMode method any time the user selects a theme.
-          onChanged: settingsControler.updateThemeMode,
-          items: const [
-            DropdownMenuItem(
-              value: ThemeMode.system,
-              child: Text('System Theme'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Glue the SettingsController to the theme selection DropdownButton.
+            //
+            // When a user selects a theme from the dropdown list, the
+            // SettingsController is updated, which rebuilds the MaterialApp.
+            DropdownButton<ThemeMode>(
+              // Read the selected themeMode from the controller
+              value: settingsControler.themeMode,
+              // Call the updateThemeMode method any time the user selects a theme.
+              onChanged: settingsControler.updateThemeMode,
+              items: const [
+                DropdownMenuItem(
+                  value: ThemeMode.system,
+                  child: Text('System Theme'),
+                ),
+                DropdownMenuItem(
+                  value: ThemeMode.light,
+                  child: Text('Light Theme'),
+                ),
+                DropdownMenuItem(
+                  value: ThemeMode.dark,
+                  child: Text('Dark Theme'),
+                )
+              ],
             ),
-            DropdownMenuItem(
-              value: ThemeMode.light,
-              child: Text('Light Theme'),
+            const Spacer(),
+            Center(
+              child: ElevatedButton(
+                onPressed: () async {
+                  // Clear the stored tokens
+                  AuthService.logout();
+
+                  // Navigate to the welcome screen
+                  Navigator.of(context).pushReplacementNamed('/welcome');
+                },
+                child: const Text('Sign Out'),
+              ),
             ),
-            DropdownMenuItem(
-              value: ThemeMode.dark,
-              child: Text('Dark Theme'),
-            )
           ],
         ),
       ),

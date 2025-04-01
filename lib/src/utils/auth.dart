@@ -61,4 +61,9 @@ class AuthService {
       return null;
     }
   }
+
+  static Future<void> logout() async {
+    useTokenStore().clearTokens();
+    await clearTokens(getConfiguredStorage());
+  }
 }
