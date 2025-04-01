@@ -4,6 +4,7 @@ import 'package:hydrate_mobile_flutter/src/models/auth.dart';
 import 'package:hydrate_mobile_flutter/src/utils/api.dart' as api;
 import 'package:hydrate_mobile_flutter/src/utils/stores.dart';
 import 'package:hydrate_mobile_flutter/src/utils/toast.dart' as toast;
+import 'package:hydrate_mobile_flutter/src/utils/storage.dart';
 
 class AuthService {
   static Future<AuthSuccessResponse?> login(BuildContext context, String email, String password) async {
@@ -12,6 +13,7 @@ class AuthService {
       if (response.statusCode == 200) {
         final tokens = AuthSuccessResponse.fromJson(jsonDecode(response.body));
         useTokenStore().setTokens(tokens);
+        await writeTokens(getConfiguredStorage(), tokens);
         return tokens;
       } else {
         throw Exception(response.body);
@@ -35,6 +37,7 @@ class AuthService {
       }
       final tokens = AuthSuccessResponse.fromJson(jsonDecode(authResponse.body));
       useTokenStore().setTokens(tokens);
+      await writeTokens(getConfiguredStorage(), tokens);
       return tokens;
     } catch (e) {
       debugPrint("Error signing up: $e");
@@ -48,6 +51,7 @@ class AuthService {
       if (response.statusCode == 200) {
         final newTokens = AuthSuccessResponse.fromJson(jsonDecode(response.body));
         useTokenStore().setTokens(newTokens);
+        await writeTokens(getConfiguredStorage(), newTokens);
         return newTokens;
       } else {
         throw Exception("Failed to refresh token");

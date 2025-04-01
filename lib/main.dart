@@ -2,10 +2,12 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zustand/flutter_zustand.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hydrate_mobile_flutter/src/utils/stores.dart';
 
 import 'src/app.dart';
 import 'src/screens/settings/settings_controller.dart';
 import 'src/screens/settings/settings_service.dart';
+import 'src/utils/storage.dart';
 
 void main() async {
   // Ensure that plugin services are initialized so that `availableCameras()`
@@ -41,6 +43,13 @@ void main() async {
   // NOTE: fileName defaults to .env and can be omitted in this case.
   // Ensure that the filename corresponds to the path in step 1 and 2.
   await dotenv.load(fileName: ".env");
+
+  // Load tokens from storage
+  final tokens = await readTokens(getConfiguredStorage());
+  if (tokens != null) {
+    // If tokens are found, store them in the zustand store
+    useTokenStore().setTokens(tokens);
+  }
 
   // TODO Add retrieveLostData(): https://pub.dev/packages/image_picker#handling-mainactivity-destruction-on-android
 
