@@ -1,3 +1,5 @@
+import 'package:latlong2/latlong.dart';
+
 class Location {
   final double lat;
   final double lng;
@@ -18,6 +20,10 @@ class Location {
         Location(lat: latitude, lng: longitude),
       _ => throw const FormatException('Failed to decode JSON Location!')
     };
+  }
+
+  LatLng toLatLng() {
+    return LatLng(lat, lng);
   }
 
   @override
