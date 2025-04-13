@@ -7,7 +7,24 @@ import 'package:hydrate_mobile_flutter/src/utils/toast.dart' as toast;
 import 'package:hydrate_mobile_flutter/src/utils/storage.dart';
 
 class AuthService {
-  static Future<AuthSuccessResponse?> login(BuildContext context, String email, String password) async {
+  static Future<AuthSuccessResponse?> checkOrRefreshToken(AuthSuccessResponse tokens) async {
+    // If no tokens, return null
+    if (tokens.isEmpty) {
+      return null;
+    }
+
+    // If tokens are expired, try to refresh
+    if (tokens.isExpired) {
+      final newTokens = await refreshToken(tokens.refreshToken, tokens.accessToken);
+      return newTokens;
+    }
+
+    // Otherwise return valid existing tokens
+    return tokens;
+  }
+
+  static Future<AuthSuccessResponse?> login(
+      BuildContext context, String email, String password) async {
     try {
       final response = await api.login(email, password);
       if (response.statusCode == 200) {
@@ -25,7 +42,8 @@ class AuthService {
     }
   }
 
-  static Future<AuthSuccessResponse?> signup(BuildContext context, String username, String email, String password) async {
+  static Future<AuthSuccessResponse?> signup(
+      BuildContext context, String username, String email, String password) async {
     try {
       final response = await api.signup(username, email, password);
       if (response.statusCode != 200) {

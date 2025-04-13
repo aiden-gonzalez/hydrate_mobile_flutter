@@ -22,27 +22,20 @@ class WelcomeScreen extends StatelessWidget {
     final storedTokens = useTokenStore().select(context, (state) => state);
 
     Future<void> tokenCheck(BuildContext context) async {
-      // If no tokens, stop now
-      if (storedTokens.isEmpty) {
+      final tokens = await AuthService.checkOrRefreshToken(storedTokens);
+      
+      // If no tokens, stay on welcome screen
+      if (tokens == null) {
         return;
       }
 
-      // If token expired, try to refresh
-      if (storedTokens.isExpired) {
-        final newTokens = await AuthService.refreshToken(storedTokens.refreshToken, storedTokens.accessToken);
-        if (newTokens == null) {
-          return;
-        }
-      }
-
-      // Tokens acquired, navigate to the main screen
+      // Tokens are ready, navigate to the main screen
       Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-            builder: (context) => HydrateNavigation(
-                settingsController: settingsController,
-                camera: camera)),
-        (Route<dynamic> route) => false);
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  HydrateNavigation(settingsController: settingsController, camera: camera)),
+          (Route<dynamic> route) => false);
     }
 
     // Check / refresh tokens and navigate after the first frame is built
@@ -58,8 +51,7 @@ class WelcomeScreen extends StatelessWidget {
               const TopScreenImage(screenImageName: 'home.jpg'),
               Expanded(
                 child: Padding(
-                  padding:
-                      const EdgeInsets.only(right: 15.0, left: 15, bottom: 15),
+                  padding: const EdgeInsets.only(right: 15.0, left: 15, bottom: 15),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -84,8 +76,8 @@ class WelcomeScreen extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      LoginScreen(settingsController: settingsController, camera: camera)),
+                                  builder: (context) => LoginScreen(
+                                      settingsController: settingsController, camera: camera)),
                             );
                           },
                         ),
@@ -102,8 +94,8 @@ class WelcomeScreen extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      SignupScreen(settingsController: settingsController, camera: camera)),
+                                  builder: (context) => SignupScreen(
+                                      settingsController: settingsController, camera: camera)),
                             );
                           },
                         ),

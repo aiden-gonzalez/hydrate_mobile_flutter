@@ -32,7 +32,7 @@ Future<http.Response> sendPasswordResetEmail(String email) {
 
 // FOB ENDPOINTS
 Future<List<Fob>> getFobsInArea(String token, LatLng location,
-    {double radiusInMeters = 1000}) async {
+    {int radiusInMeters = 1000}) async {
   final params = {
     'latitude': location.latitude.toString(),
     'longitude': location.longitude.toString(),
@@ -55,10 +55,13 @@ enum HttpMethod { get, post }
 
 Future<http.Response> apiRequest(HttpMethod method, String path,
     {Map<String, String>? params, Object? body, String? token}) {
-  Uri uri = Uri.parse("${Environment.backendApiUrl()}/api/$path");
-  uri.queryParameters.addAll(params ?? {});
+  // Set up URI with path and params
+  Uri uri = Uri.parse("${Environment.backendApiUrl()}/api/$path").replace(queryParameters: params ?? {});
   debugPrint(uri.toString());
+
+  // JSON encode body
   String jsonBody = jsonEncode(body);
+
   return switch (method) {
     HttpMethod.get => http.get(uri, headers: <String, String>{
         'Content-Type': 'application/json',
