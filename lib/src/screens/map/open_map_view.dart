@@ -92,7 +92,7 @@ class _OpenMapViewState extends State<OpenMapView> {
       debounceTimer?.cancel();
 
       // Start a new debounce timer
-      debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      debounceTimer = Timer(const Duration(milliseconds: 700), () {
         // Fetch markers for the new center
         fetchMarkers(mapController.camera.center);
       });

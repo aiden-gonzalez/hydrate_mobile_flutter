@@ -59,9 +59,11 @@ class TakePictureScreenState extends State<TakePictureScreen> {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               // If the Future is complete, display the preview.
+              debugPrint("Camera initialized");
               return CameraPreview(_controller);
             } else {
               // Otherwise, display a loading indicator.
+              debugPrint("Camera not initialized");
               return const Center(child: CircularProgressIndicator());
             }
           },
@@ -74,17 +76,23 @@ class TakePictureScreenState extends State<TakePictureScreen> {
             children: [
               // Flash toggle button
               FloatingActionButton(
-                onPressed: () {
-                  if (_flashEnabled) {
-                    _controller.setFlashMode(FlashMode.off);
-                    setState(() {
-                      _flashEnabled = false;
-                    });
-                  } else {
-                    _controller.setFlashMode(FlashMode.always);
-                    setState(() {
-                      _flashEnabled = true;
-                    });
+                onPressed: () async {
+                  debugPrint('Current flashEnabled state: $_flashEnabled');
+                  try {
+                    if (_flashEnabled) {
+                      await _controller.setFlashMode(FlashMode.off);
+                      setState(() {
+                        _flashEnabled = false;
+                      });
+                    } else {
+                      await _controller.setFlashMode(FlashMode.always);
+                      setState(() {
+                        _flashEnabled = true;
+                      });
+                    }
+                    debugPrint('Flash mode set successfully. Current state: $_flashEnabled');
+                  } catch (e) {
+                    debugPrint('Error setting flash mode: $e');
                   }
                 },
                 child: _flashEnabled ? const Icon(Icons.flash_on) : const Icon(Icons.flash_off)
