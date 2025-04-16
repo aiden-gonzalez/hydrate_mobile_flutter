@@ -231,7 +231,9 @@ class _FobCreateViewState extends State<FobCreateView> {
                         ElevatedButton(
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
-                              // Handle form submission, e.g., save the data
+                              if (isFountain()) {
+                                await 
+                              }
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(SnackBar(content: Text('Processing Data')));
                             }
