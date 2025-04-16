@@ -59,11 +59,9 @@ class TakePictureScreenState extends State<TakePictureScreen> {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               // If the Future is complete, display the preview.
-              debugPrint("Camera initialized");
               return CameraPreview(_controller);
             } else {
               // Otherwise, display a loading indicator.
-              debugPrint("Camera not initialized");
               return const Center(child: CircularProgressIndicator());
             }
           },
@@ -77,7 +75,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
               // Flash toggle button
               FloatingActionButton(
                 onPressed: () async {
-                  debugPrint('Current flashEnabled state: $_flashEnabled');
                   try {
                     if (_flashEnabled) {
                       await _controller.setFlashMode(FlashMode.off);
