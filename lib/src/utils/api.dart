@@ -31,6 +31,11 @@ Future<http.Response> sendPasswordResetEmail(String email) {
 }
 
 // FOB ENDPOINTS
+Future<http.Response> createFountain(String token, Fountain fountain) {
+  Map<String, dynamic> request = fountain.toJson();
+  return apiRequest(HttpMethod.post, "fountains", body: request, token: token);
+}
+
 Future<List<Fob>> getFobsInArea(String token, LatLng location,
     {int radiusInMeters = 1000}) async {
   final params = {
@@ -44,6 +49,9 @@ Future<List<Fob>> getFobsInArea(String token, LatLng location,
     apiRequest(HttpMethod.get, "fountains", params: params, token: token),
     apiRequest(HttpMethod.get, "bathrooms", params: params, token: token)
   ]);
+
+  debugPrint(fobRequests[0].body);
+  debugPrint(fobRequests[1].body);
 
   final fountains = (jsonDecode(fobRequests[0].body) as List)
       .map((f) => Fountain.fromJson(f))

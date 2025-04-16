@@ -229,7 +229,7 @@ class _FobCreateViewState extends State<FobCreateView> {
                                 secondary: Icon(Icons.baby_changing_station)),
                           ),
                         ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               // Handle form submission, e.g., save the data
                               ScaffoldMessenger.of(context)
