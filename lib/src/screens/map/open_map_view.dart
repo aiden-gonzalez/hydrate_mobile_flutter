@@ -8,6 +8,8 @@ import 'package:hydrate_mobile_flutter/src/screens/fobs/fob_detail_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/utils/api.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:hydrate_mobile_flutter/src/utils/auth.dart';
+import 'package:hydrate_mobile_flutter/src/utils/stores.dart';
 
 class OpenMapView extends StatefulWidget {
   const OpenMapView({super.key, required this.settingsController, required this.camera});
@@ -40,7 +42,15 @@ class _OpenMapViewState extends State<OpenMapView> {
 
   Future<void> fetchMarkers(LatLng cameraPosition) async {
     List<Marker> fetchedMarkers = [];
-    final fobs = await getFobsInArea("token", cameraPosition);
+    final tokenStore = useTokenStore();
+    final tokens = await AuthService.checkOrRefreshToken(tokenStore.state);
+
+    if (tokens == null) {
+      debugPrint("Unable to fetch markers: No valid token");
+      return;
+    }
+
+    final fobs = await getFobsInArea(tokens.accessToken, cameraPosition);
     for (var fob in fobs) {
       fetchedMarkers.add(
         Marker(

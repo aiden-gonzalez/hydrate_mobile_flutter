@@ -45,8 +45,12 @@ Future<List<Fob>> getFobsInArea(String token, LatLng location,
     apiRequest(HttpMethod.get, "bathrooms", params: params, token: token)
   ]);
 
-  final fountains = jsonDecode(fobRequests[0].body) as List<Fountain>;
-  final bathrooms = jsonDecode(fobRequests[1].body) as List<Bathroom>;
+  final fountains = (jsonDecode(fobRequests[0].body) as List)
+      .map((f) => Fountain.fromJson(f))
+      .toList();
+  final bathrooms = (jsonDecode(fobRequests[1].body) as List)
+      .map((b) => Bathroom.fromJson(b))
+      .toList();
 
   return [...fountains, ...bathrooms];
 }
