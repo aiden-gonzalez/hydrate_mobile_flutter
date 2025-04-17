@@ -44,7 +44,7 @@ class _FobCreateViewState extends State<FobCreateView> {
   String? imagePath;
 
   // Location for the new FoB
-  LatLng selectedLocation = LatLng(0, 0); // Initialize to provided location
+  LatLng? selectedLocation; // Initialize to provided location
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +116,7 @@ class _FobCreateViewState extends State<FobCreateView> {
                           MarkerLayer(
                             markers: [
                               Marker(
-                                point: selectedLocation,
+                                point: selectedLocation ?? widget.initialLocation,
                                 width: 50,
                                 height: 50,
                                 alignment: Alignment.topCenter,
@@ -272,12 +272,15 @@ class _FobCreateViewState extends State<FobCreateView> {
                               if (isFountain()) {
                                 var response = await createFountain(
                                     "token",
-                                    FountainInfo(
-                                        name: name,
-                                        bottleFiller: hasBottleFiller,
-                                        location: Location(
-                                            lat: selectedLocation.latitude,
-                                            lng: selectedLocation.longitude)));
+                                    FountainCreationDetails(
+                                      name: name,
+                                      location: Location(
+                                            lat: selectedLocation?.latitude ?? widget.initialLocation.latitude,
+                                            lng: selectedLocation?.longitude ?? widget.initialLocation.longitude),
+                                      info: FountainInfo(
+                                        bottleFiller: hasBottleFiller
+                                      )
+                                    ));
                                 if (response.statusCode == 200) {
                                   ScaffoldMessenger.of(context)
                                   .showSnackBar(SnackBar(content: Text("Fountain created successfully")));

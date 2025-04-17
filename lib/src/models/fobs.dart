@@ -1,5 +1,23 @@
 import 'package:hydrate_mobile_flutter/src/models/misc.dart';
 
+class FountainCreationDetails {
+  final String name;
+  final Location location;
+  final FountainInfo info;
+
+  const FountainCreationDetails({
+    required this.name,
+    required this.location,
+    required this.info
+  });
+
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    'location': location.toJson(),
+    'info': info.toJson()
+  };
+}
+
 class FountainInfo {
   final bool bottleFiller;
 

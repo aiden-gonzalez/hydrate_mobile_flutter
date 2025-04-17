@@ -31,8 +31,8 @@ Future<http.Response> sendPasswordResetEmail(String email) {
 }
 
 // FOB ENDPOINTS
-Future<http.Response> createFountain(String token, FountainInfo fountainInfo) {
-  Map<String, dynamic> request = fountainInfo.toJson();
+Future<http.Response> createFountain(String token, FountainCreationDetails fountainCreationDetails) {
+  Map<String, dynamic> request = fountainCreationDetails.toJson();
   return apiRequest(HttpMethod.post, "fountains", body: request, token: token);
 }
 
