@@ -27,10 +27,8 @@ class FobStore extends Store<Fob> {
       id: "",
       createdAt: 0,
       updatedAt: 0,
-      name: "",
-      location: Location(lat: 0, lng: 0),
       userId: "",
-      info: FountainInfo(bottleFiller: false));
+      info: FountainInfo(name: "", location: Location(lat: 0, lng: 0), bottleFiller: false));
 
   FobStore()
       : super(emptyFob);
