@@ -3,13 +3,20 @@ import 'dart:ui';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
+import 'package:hydrate_mobile_flutter/src/models/misc.dart';
 import 'package:hydrate_mobile_flutter/src/screens/take_picture_screen.dart';
+import 'package:hydrate_mobile_flutter/src/utils/api.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class FobCreateView extends StatefulWidget {
-  const FobCreateView({super.key, required this.camera});
+  const FobCreateView({super.key, required this.camera, required this.initialLocation, required this.initialZoom});
 
   final CameraDescription camera;
+  final LatLng initialLocation;
+  final double initialZoom;
 
   @override
   State<FobCreateView> createState() => _FobCreateViewState();
@@ -26,7 +33,6 @@ class _FobCreateViewState extends State<FobCreateView> {
 
   // String fields
   String name = "";
-  String description = "";
   String gender = "Male";
 
   // Checkboxes
@@ -36,6 +42,9 @@ class _FobCreateViewState extends State<FobCreateView> {
 
   // Image path
   String? imagePath;
+
+  // Location for the new FoB
+  LatLng selectedLocation = LatLng(0, 0); // Initialize to provided location
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +86,52 @@ class _FobCreateViewState extends State<FobCreateView> {
                           minHeight: 50.0, minWidth: (MediaQuery.of(context).size.width) / 3),
                       isSelected: _selectedFobType,
                       children: types),
+                  SizedBox(height: 10),
+                  // Map for selecting location
+                  Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Container(
+                      height: 300,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10.0),
+                        color: Theme.of(context).highlightColor,
+                      ),
+                      child: FlutterMap(
+                        options: MapOptions(
+                          initialCenter: widget.initialLocation,
+                          initialZoom: widget.initialZoom,
+                          onPositionChanged: (position, hasGesture) {
+                            if (hasGesture) {
+                              setState(() {
+                                selectedLocation = position.center;
+                              });
+                            }
+                          },
+                        ),
+                        children: [
+                          TileLayer(
+                            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                            userAgentPackageName: "dev.fleaflet.flutter_map.example",
+                          ),
+                          MarkerLayer(
+                            markers: [
+                              Marker(
+                                point: selectedLocation,
+                                width: 50,
+                                height: 50,
+                                alignment: Alignment.topCenter,
+                                child: Icon(
+                                  Icons.location_pin,
+                                  size: 50,
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   SizedBox(height: 10),
                   // Add picture
                   Padding(
@@ -149,23 +204,6 @@ class _FobCreateViewState extends State<FobCreateView> {
                                 return null;
                               }),
                         ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          child: TextFormField(
-                              decoration: InputDecoration(labelText: "Description"),
-                              minLines: 2,
-                              maxLines: 3,
-                              onChanged: (value) {
-                                setState(() => description = value);
-                              },
-                              // The validator receives the text that the user has entered.
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter a description';
-                                }
-                                return null;
-                              }),
-                        ),
                         if (isFountain())
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: 20),
@@ -232,10 +270,22 @@ class _FobCreateViewState extends State<FobCreateView> {
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               if (isFountain()) {
-                                await 
+                                var response = await createFountain(
+                                    "token",
+                                    FountainInfo(
+                                        name: name,
+                                        bottleFiller: hasBottleFiller,
+                                        location: Location(
+                                            lat: selectedLocation.latitude,
+                                            lng: selectedLocation.longitude)));
+                                if (response.statusCode == 200) {
+                                  ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(content: Text("Fountain created successfully")));
+                                } else {
+                                  ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(content: Text("Failed to create fountain, try again")));
+                                }
                               }
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(content: Text('Processing Data')));
                             }
                           },
                           child: Text('Submit'),

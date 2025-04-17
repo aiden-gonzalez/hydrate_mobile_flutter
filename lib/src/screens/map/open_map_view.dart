@@ -125,7 +125,7 @@ class _OpenMapViewState extends State<OpenMapView> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => FobCreateView(camera: widget.camera)),
+              MaterialPageRoute(builder: (context) => FobCreateView(camera: widget.camera, initialLocation: mapController.camera.center, initialZoom: mapController.camera.zoom)),
             );
           },
           label: const Text("Contribute"),
