@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
 import 'package:hydrate_mobile_flutter/src/screens/fobs/fob_create_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/fobs/fob_detail_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
@@ -55,9 +54,7 @@ class _OpenMapViewState extends State<OpenMapView> {
     for (var fob in fobs) {
       fetchedMarkers.add(
         Marker(
-          point: fob is Fountain
-              ? LatLng(fob.info.location.lat, fob.info.location.lng)
-              : LatLng((fob as Bathroom).info.location.lat, fob.info.location.lng),
+          point: fob.location.toLatLng(),
           width: 50,
           height: 50,
           alignment: Alignment.topCenter,
