@@ -5,36 +5,22 @@ class FountainCreationDetails {
   final Location location;
   final FountainInfo info;
 
-  const FountainCreationDetails({
-    required this.name,
-    required this.location,
-    required this.info
-  });
+  const FountainCreationDetails({required this.name, required this.location, required this.info});
 
-  Map<String, dynamic> toJson() => {
-    'name': name,
-    'location': location.toJson(),
-    'info': info.toJson()
-  };
+  Map<String, dynamic> toJson() =>
+      {'name': name, 'location': location.toJson(), 'info': info.toJson()};
 }
 
 class FountainInfo {
   final bool bottleFiller;
 
-  const FountainInfo({
-    required this.bottleFiller
-  });
+  const FountainInfo({required this.bottleFiller});
 
-  Map<String, dynamic> toJson() => {
-    'bottle_filler': bottleFiller
-  };
+  Map<String, dynamic> toJson() => {'bottle_filler': bottleFiller};
 
   factory FountainInfo.fromJson(Map<String, dynamic> json) {
     return switch (json) {
-      {
-        'bottle_filler': bool bottleFiller
-      } =>
-        FountainInfo(bottleFiller: bottleFiller),
+      {'bottle_filler': bool bottleFiller} => FountainInfo(bottleFiller: bottleFiller),
       _ => throw const FormatException('Failed to decode JSON FountainInfo!')
     };
   }
@@ -80,6 +66,17 @@ class Fountain extends Fob {
       _ => throw const FormatException('Failed to decode JSON Fountain!')
     };
   }
+
+  static Fountain empty() {
+    return Fountain(
+        id: "",
+        createdAt: 0,
+        updatedAt: 0,
+        name: "",
+        location: Location(lat: 0, lng: 0),
+        userId: "",
+        info: FountainInfo(bottleFiller: false));
+  }
 }
 
 class BathroomInfo {
@@ -87,17 +84,11 @@ class BathroomInfo {
   final bool sanitaryProducts;
   final bool babyChanger;
 
-  const BathroomInfo({
-    required this.gender,
-    required this.sanitaryProducts,
-    required this.babyChanger
-  });
+  const BathroomInfo(
+      {required this.gender, required this.sanitaryProducts, required this.babyChanger});
 
-  Map<String, dynamic> toJson() => {
-    'gender': gender,
-    'sanitary_products': sanitaryProducts,
-    'baby_changer': babyChanger
-  };
+  Map<String, dynamic> toJson() =>
+      {'gender': gender, 'sanitary_products': sanitaryProducts, 'baby_changer': babyChanger};
 
   factory BathroomInfo.fromJson(Map<String, dynamic> json) {
     return switch (json) {
@@ -171,11 +162,11 @@ abstract class Fob {
       required this.location});
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'user_id': userId,
-    'created_at': createdAt,
-    'updated_at': updatedAt,
-    'location': location.toJson()
-  };
+        'id': id,
+        'name': name,
+        'user_id': userId,
+        'created_at': createdAt,
+        'updated_at': updatedAt,
+        'location': location.toJson()
+      };
 }

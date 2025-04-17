@@ -82,4 +82,13 @@ class AuthSuccessResponse {
   bool get isEmpty {
     return accessToken.isEmpty && refreshToken.isEmpty && tokenType.isEmpty && expires == 0 && username.isEmpty;
   }
+
+  static AuthSuccessResponse empty() {
+    return AuthSuccessResponse(
+      accessToken: "",
+      refreshToken: "",
+      tokenType: "",
+      expires: 0,
+      username: "");
+  }
 }
