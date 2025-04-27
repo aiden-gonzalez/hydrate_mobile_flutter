@@ -7,6 +7,7 @@ import 'package:hydrate_mobile_flutter/src/screens/fobs/fob_create_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/fobs/fob_detail_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/utils/api.dart';
+import 'package:hydrate_mobile_flutter/src/utils/calc.dart' as calc;
 import 'package:latlong2/latlong.dart';
 import 'package:hydrate_mobile_flutter/src/utils/auth.dart';
 import 'package:hydrate_mobile_flutter/src/utils/stores.dart';
@@ -37,10 +38,10 @@ class _OpenMapViewState extends State<OpenMapView> {
   void initState() {
     super.initState();
     // Initial marker fetch
-    fetchMarkers(purdue);
+    fetchMarkers(purdue, getMapRadius());
   }
 
-  Future<void> fetchMarkers(LatLng cameraPosition) async {
+  Future<void> fetchMarkers(LatLng cameraPosition, int radius) async {
     List<Marker> fetchedMarkers = [];
     final tokenStore = useTokenStore();
     final tokens = await AuthService.checkOrRefreshToken(tokenStore.state);
@@ -50,7 +51,7 @@ class _OpenMapViewState extends State<OpenMapView> {
       return;
     }
 
-    final fobs = await getFobsInArea(tokens.accessToken, cameraPosition);
+    final fobs = await getFobsInArea(tokens.accessToken, cameraPosition, radiusInMeters: radius);
     for (var fob in fobs) {
       fetchedMarkers.add(
         Marker(
@@ -86,17 +87,19 @@ class _OpenMapViewState extends State<OpenMapView> {
   }
 
   void onMapEvent(MapEvent event) {
-    // If the event is a move end event, we want to fetch markers
     if (event is MapEventMoveEnd) {
-      // Cancel any ongoing debounce timer
       debounceTimer?.cancel();
 
-      // Start a new debounce timer
-      debounceTimer = Timer(const Duration(milliseconds: 700), () {
-        // Fetch markers for the new center
-        fetchMarkers(mapController.camera.center);
+      debounceTimer = Timer(const Duration(milliseconds: 500), () {
+        fetchMarkers(mapController.camera.center, getMapRadius());
       });
     }
+  }
+
+  int getMapRadius() {
+    final bounds = mapController.camera.visibleBounds;
+    final radius = calc.distance(bounds.northEast, bounds.southWest) / 2;
+    return radius.toInt();
   }
 
   @override

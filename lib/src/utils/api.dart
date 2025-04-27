@@ -36,8 +36,7 @@ Future<http.Response> createFountain(String token, FountainCreationDetails fount
   return apiRequest(HttpMethod.post, "fountains", body: request, token: token);
 }
 
-Future<List<Fob>> getFobsInArea(String token, LatLng location,
-    {int radiusInMeters = 1000}) async {
+Future<List<Fob>> getFobsInArea(String token, LatLng location, {int radiusInMeters = 1000}) async {
   final params = {
     'latitude': location.latitude.toString(),
     'longitude': location.longitude.toString(),
