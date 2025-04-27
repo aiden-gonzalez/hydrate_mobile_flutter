@@ -78,9 +78,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         alertDescription: "Confirm to send password reset email",
                         dialogResponseHandler: (choice) async {
                           if (choice == "Ok") {
+                            if (email.isEmpty) {
+                              toast.showToast(context, "Please enter your email address to send a reset email.");
+                              return;
+                            }
                             try {
                               await api.sendPasswordResetEmail(email);
-                              toast.showToast(context, "Password reset email sent successfully.");
+                              toast.showToast(context, "If an account exists with that email, a reset email has been sent.");
                             } catch (e) {
                               debugPrint("Error sending password reset email: $e");
                               toast.showToast(context, "Failed to send password reset email.");

@@ -38,7 +38,7 @@ class _OpenMapViewState extends State<OpenMapView> {
   void initState() {
     super.initState();
     // Initial marker fetch
-    fetchMarkers(purdue, getMapRadius());
+    fetchMarkers(purdue, 1000);
   }
 
   Future<void> fetchMarkers(LatLng cameraPosition, int radius) async {
