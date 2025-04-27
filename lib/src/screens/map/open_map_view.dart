@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
 import 'package:hydrate_mobile_flutter/src/screens/fobs/fob_create_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/fobs/fob_detail_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
@@ -24,21 +25,23 @@ class OpenMapView extends StatefulWidget {
 
 class _OpenMapViewState extends State<OpenMapView> {
   final mapController = MapController();
-  final LatLng purdue = LatLng(40.429052, -86.913124);
 
   TileLayer get openStreetMapTileLayer => TileLayer(
     urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     userAgentPackageName: "dev.fleaflet.flutter_map.example",
   );
 
-  List<Marker> markers = [];
+  LatLng fobsCenter = LatLng(40.429052, -86.913124); // Center of fetched fobs
+  List<Fob> fobs = []; // Fobs currently fetched for map
+  List<Marker> markers = []; // Markers currently on map
+  
   Timer? debounceTimer;
 
   @override
   void initState() {
     super.initState();
     // Initial marker fetch
-    fetchMarkers(purdue, 1000);
+    fetchMarkers(fobsCenter, 1000);
   }
 
   Future<void> fetchMarkers(LatLng cameraPosition, int radius) async {
@@ -51,8 +54,8 @@ class _OpenMapViewState extends State<OpenMapView> {
       return;
     }
 
-    final fobs = await getFobsInArea(tokens.accessToken, cameraPosition, radiusInMeters: radius);
-    for (var fob in fobs) {
+    final fobsInArea = await getFobsInArea(tokens.accessToken, cameraPosition, radiusInMeters: radius);
+    for (var fob in fobsInArea) {
       fetchedMarkers.add(
         Marker(
           point: fob.location.toLatLng(),
@@ -82,8 +85,19 @@ class _OpenMapViewState extends State<OpenMapView> {
     }
     
     setState(() {
+      fobsCenter = cameraPosition;
+      fobs = fobsInArea; 
       markers = fetchedMarkers;
     });
+  }
+
+  List<Fob> getSortedFobsByDistance(LatLng center) {
+    fobs.sort((a, b) {
+      final distanceA = calc.distance(center, a.location.toLatLng());
+      final distanceB = calc.distance(center, b.location.toLatLng());
+      return distanceA.compareTo(distanceB);
+    });
+    return fobs;
   }
 
   void onMapEvent(MapEvent event) {
@@ -91,13 +105,12 @@ class _OpenMapViewState extends State<OpenMapView> {
       debounceTimer?.cancel();
 
       debounceTimer = Timer(const Duration(milliseconds: 500), () {
-        fetchMarkers(mapController.camera.center, getMapRadius());
+        fetchMarkers(mapController.camera.center, getMapRadius(mapController.camera.visibleBounds));
       });
     }
   }
 
-  int getMapRadius() {
-    final bounds = mapController.camera.visibleBounds;
+  int getMapRadius(LatLngBounds bounds) {
     final radius = calc.distance(bounds.northEast, bounds.southWest) / 2;
     return radius.toInt();
   }
@@ -106,30 +119,99 @@ class _OpenMapViewState extends State<OpenMapView> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: FlutterMap(
-          mapController: mapController,
-          options: MapOptions(
-            initialCenter: purdue,
-            initialZoom: 17,
-            interactionOptions: const InteractionOptions(
-              flags: ~InteractiveFlag.doubleTapZoom
-            ),
-            onMapEvent: onMapEvent
-          ),
+        body: Stack(
           children: [
-            openStreetMapTileLayer,
-            MarkerLayer(markers: markers)
-          ]
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => FobCreateView(camera: widget.camera, initialLocation: mapController.camera.center, initialZoom: mapController.camera.zoom)),
-            );
-          },
-          label: const Text("Contribute"),
-          icon: const Icon(Icons.add),
+            Column(
+              children: [
+                Expanded(
+                  child: FlutterMap(
+                    mapController: mapController,
+                    options: MapOptions(
+                      initialCenter: fobsCenter,
+                      initialZoom: 17,
+                      interactionOptions: const InteractionOptions(
+                        flags: ~InteractiveFlag.doubleTapZoom
+                      ),
+                      onMapEvent: onMapEvent
+                    ),
+                    children: [
+                      openStreetMapTileLayer,
+                      MarkerLayer(markers: markers)
+                    ]
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: SizedBox(
+                    height: 120,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: fobs.length,
+                      itemBuilder: (context, index) {
+                        final fob = fobs[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => FobDetailView(
+                                  settingsController: widget.settingsController,
+                                  fobId: fob.id
+                                )
+                              )
+                            );
+                          },
+                          child: Card(
+                            margin: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Container(
+                              width: 200,
+                              padding: const EdgeInsets.all(8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    fob.name,
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "Distance: ${calc.distance(fobsCenter, fob.location.toLatLng()).toStringAsFixed(2)} m",
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    fob.name,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Positioned(
+              bottom: 140, // Position above the cards section
+              right: 16,
+              child: FloatingActionButton.extended(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => FobCreateView(camera: widget.camera, initialLocation: mapController.camera.center, initialZoom: mapController.camera.zoom)),
+                  );
+                },
+                label: const Text("Contribute"),
+                icon: const Icon(Icons.add),
+              ),
+            ),
+          ],
         ),
       ),
     );
