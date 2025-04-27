@@ -118,89 +118,26 @@ class _OpenMapViewState extends State<OpenMapView> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Scaffold(
-        body: Stack(
-          children: [
-            Column(
-              children: [
-                Expanded(
-                  child: FlutterMap(
-                    mapController: mapController,
-                    options: MapOptions(
-                      initialCenter: fobsCenter,
-                      initialZoom: 17,
-                      interactionOptions: const InteractionOptions(
-                        flags: ~InteractiveFlag.doubleTapZoom
-                      ),
-                      onMapEvent: onMapEvent
-                    ),
-                    children: [
-                      openStreetMapTileLayer,
-                      MarkerLayer(markers: markers)
-                    ]
+      child: Column(
+        children: [
+          Expanded(
+            child: Scaffold(
+              body: FlutterMap(
+                mapController: mapController,
+                options: MapOptions(
+                  initialCenter: fobsCenter,
+                  initialZoom: 17,
+                  interactionOptions: const InteractionOptions(
+                    flags: ~InteractiveFlag.doubleTapZoom
                   ),
+                  onMapEvent: onMapEvent
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: SizedBox(
-                    height: 120,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: fobs.length,
-                      itemBuilder: (context, index) {
-                        final fob = fobs[index];
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => FobDetailView(
-                                  settingsController: widget.settingsController,
-                                  fobId: fob.id
-                                )
-                              )
-                            );
-                          },
-                          child: Card(
-                            margin: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Container(
-                              width: 200,
-                              padding: const EdgeInsets.all(8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    fob.name,
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "Distance: ${calc.distance(fobsCenter, fob.location.toLatLng()).toStringAsFixed(2)} m",
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    fob.name,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Positioned(
-              bottom: 140, // Position above the cards section
-              right: 16,
-              child: FloatingActionButton.extended(
+                children: [
+                  openStreetMapTileLayer,
+                  MarkerLayer(markers: markers)
+                ]
+              ),
+              floatingActionButton: FloatingActionButton.extended(
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -211,9 +148,78 @@ class _OpenMapViewState extends State<OpenMapView> {
                 icon: const Icon(Icons.add),
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: SizedBox(
+              height: 120,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: fobs.length,
+                itemBuilder: (context, index) {
+                  final fob = fobs[index];
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FobDetailView(
+                            settingsController: widget.settingsController,
+                            fobId: fob.id
+                          )
+                        )
+                      );
+                    },
+                    child: Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Container(
+                        width: 200,
+                        padding: const EdgeInsets.all(8),
+                        child: Stack(
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  fob.name,
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  fob.name,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ],
+                            ),
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.location_pin, size: 16, color: Colors.red),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    "${calc.distance(fobsCenter, fob.location.toLatLng()).toStringAsFixed(2)} m",
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      )
     );
   }
 
