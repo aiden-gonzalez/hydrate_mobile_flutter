@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -282,12 +281,11 @@ class _FobCreateViewState extends State<FobCreateView> {
                                         bottleFiller: hasBottleFiller
                                       )
                                     ));
-                                if (response.statusCode == 200) {
-                                  ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(content: Text("Fountain created successfully")));
+                                if (response.statusCode == 201) {
+                                  toast.showToast(context, "Fountain created successfully");
+                                  Navigator.pop(context); // Exit the page and return to the main map screen
                                 } else {
-                                  ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(content: Text("Failed to create fountain, try again")));
+                                  toast.showToast(context, "Failed to create fountain: ${response.body}");
                                 }
                               }
                             }

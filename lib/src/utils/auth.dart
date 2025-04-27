@@ -59,6 +59,7 @@ class AuthService {
       return tokens;
     } catch (e) {
       debugPrint("Error signing up: $e");
+      toast.showToast(context, e.toString());
       return null;
     }
   }
