@@ -36,8 +36,10 @@ class Fountain extends Fob {
       required super.updatedAt,
       required super.name,
       required super.location,
+      required super.averageRating,
       required super.userId});
 
+  @override
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fob = super.toJson();
     fob['info'] = info.toJson();
@@ -53,6 +55,7 @@ class Fountain extends Fob {
         'user_id': String userId,
         'created_at': int createdAt,
         'updated_at': int updatedAt,
+        'average_rating': double averageRating,
         'location': Map<String, dynamic> location
       } =>
         Fountain(
@@ -62,6 +65,7 @@ class Fountain extends Fob {
             userId: userId,
             createdAt: createdAt,
             updatedAt: updatedAt,
+            averageRating: averageRating,
             location: Location.fromJson(location)),
       _ => throw const FormatException('Failed to decode JSON Fountain!')
     };
@@ -75,6 +79,7 @@ class Fountain extends Fob {
         name: "",
         location: Location(lat: 0, lng: 0),
         userId: "",
+        averageRating: 0,
         info: FountainInfo(bottleFiller: false));
   }
 }
@@ -113,8 +118,10 @@ class Bathroom extends Fob {
       required super.updatedAt,
       required super.name,
       required super.location,
+      required super.averageRating,
       required super.userId});
 
+  @override
   Map<String, dynamic> toJson() {
     Map<String, dynamic> fob = super.toJson();
     fob['info'] = info.toJson();
@@ -130,7 +137,8 @@ class Bathroom extends Fob {
         'user_id': String userId,
         'created_at': int createdAt,
         'updated_at': int updatedAt,
-        'location': Map<String, dynamic> location
+        'location': Map<String, dynamic> location,
+        'average_rating': double averageRating
       } =>
         Bathroom(
             info: BathroomInfo.fromJson(bathroomInfo),
@@ -139,6 +147,7 @@ class Bathroom extends Fob {
             userId: userId,
             createdAt: createdAt,
             updatedAt: updatedAt,
+            averageRating: averageRating,
             location: Location.fromJson(location)),
       _ => throw const FormatException('Failed to decode JSON Bathroom!')
     };
@@ -152,6 +161,7 @@ abstract class Fob {
   final int createdAt;
   final int updatedAt;
   final Location location;
+  final double averageRating;
 
   const Fob(
       {required this.id,
@@ -159,6 +169,7 @@ abstract class Fob {
       required this.userId,
       required this.createdAt,
       required this.updatedAt,
+      required this.averageRating,
       required this.location});
 
   Map<String, dynamic> toJson() => {
@@ -167,6 +178,10 @@ abstract class Fob {
         'user_id': userId,
         'created_at': createdAt,
         'updated_at': updatedAt,
+        'average_rating': averageRating,
         'location': location.toJson()
       };
+  
+  bool isFountain() => this is Fountain;
+  bool isBathroom() => this is Bathroom;
 }

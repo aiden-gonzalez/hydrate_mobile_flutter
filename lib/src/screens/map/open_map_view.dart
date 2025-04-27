@@ -83,7 +83,22 @@ class _OpenMapViewState extends State<OpenMapView> {
         )
       );
     }
-    
+
+    // Add a small marker at the center of the map
+    fetchedMarkers.add(
+      Marker(
+        point: cameraPosition,
+        width: 20,
+        height: 20,
+        alignment: Alignment.center,
+        child: const Icon(
+          Icons.location_searching,
+          size: 20,
+          color: Colors.blueAccent,
+        ),
+      ),
+    );
+
     setState(() {
       fobsCenter = cameraPosition;
       fobs = fobsInArea; 
@@ -152,7 +167,7 @@ class _OpenMapViewState extends State<OpenMapView> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: SizedBox(
-              height: 120,
+              height: 100,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: fobs.length,
@@ -173,42 +188,54 @@ class _OpenMapViewState extends State<OpenMapView> {
                     child: Card(
                       margin: const EdgeInsets.symmetric(horizontal: 8),
                       child: Container(
-                        width: 200,
+                        width: 150,
                         padding: const EdgeInsets.all(8),
-                        child: Stack(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            Row(
                               children: [
-                                Text(
-                                  fob.name,
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                  overflow: TextOverflow.ellipsis,
+                                Icon(
+                                  fob.isFountain()
+                                      ? Icons.water_drop
+                                      : Icons.bathroom,
+                                  size: 20,
+                                  color: Colors.blue,
                                 ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  fob.name,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 12),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    fob.name,
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ],
                             ),
-                            Positioned(
-                              top: 0,
-                              right: 0,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.location_pin, size: 16, color: Colors.red),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    "${calc.distance(fobsCenter, fob.location.toLatLng()).toStringAsFixed(2)} m",
-                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.location_pin, size: 16, color: Colors.red),
+                                const SizedBox(width: 4),
+                                Text(
+                                  "${calc.distance(fobsCenter, fob.location.toLatLng()).toStringAsFixed(2)} m",
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                ),
+                              ],
                             ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: List.generate(5, (index) {
+                                return Icon(
+                                  index + 1 == fob.averageRating.round()
+                                      ? Icons.star
+                                      : Icons.star_border,
+                                  size: 16,
+                                  color: Colors.amber,
+                                );
+                              }),
+                            )
                           ],
                         ),
                       ),
