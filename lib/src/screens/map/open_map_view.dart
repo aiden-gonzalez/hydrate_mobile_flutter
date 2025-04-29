@@ -6,6 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
 import 'package:hydrate_mobile_flutter/src/screens/fobs/fob_create_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/fobs/fob_detail_view.dart';
+import 'package:hydrate_mobile_flutter/src/screens/map/fob_card_list_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/utils/api.dart';
 import 'package:hydrate_mobile_flutter/src/utils/calc.dart' as calc;
@@ -167,83 +168,10 @@ class _OpenMapViewState extends State<OpenMapView> {
           if (fobs.isNotEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: SizedBox(
-                height: 100,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: fobs.length,
-                  itemBuilder: (context, index) {
-                    final fob = fobs[index];
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => FobDetailView(
-                              settingsController: widget.settingsController,
-                              fobId: fob.id
-                            )
-                          )
-                        );
-                      },
-                      child: Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Container(
-                          width: 150,
-                          padding: const EdgeInsets.all(8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    fob.isFountain()
-                                        ? Icons.water_drop
-                                        : Icons.bathroom,
-                                    size: 20,
-                                    color: Colors.blue,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      fob.name,
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.location_pin, size: 16, color: Colors.red),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    "${calc.distance(fobsCenter, fob.location.toLatLng()).toStringAsFixed(2)} m",
-                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: List.generate(5, (index) {
-                                  return Icon(
-                                    index + 1 == fob.averageRating?.round()
-                                        ? Icons.star
-                                        : Icons.star_border,
-                                    size: 16,
-                                    color: Colors.amber,
-                                  );
-                                }),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+              child: FobCardListView(
+                fobs: fobs,
+                fobsCenter: fobsCenter,
+                settingsController: widget.settingsController,
               ),
             ),
         ],
