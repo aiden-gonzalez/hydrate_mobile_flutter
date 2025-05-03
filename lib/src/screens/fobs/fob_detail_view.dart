@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
-import 'package:hydrate_mobile_flutter/src/models/misc.dart';
 import 'package:hydrate_mobile_flutter/src/screens/profile_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
+import 'package:hydrate_mobile_flutter/src/utils/api.dart';
+import 'package:hydrate_mobile_flutter/src/utils/auth.dart';
+import 'package:hydrate_mobile_flutter/src/utils/stores.dart';
 
 // Define color constants
 const Color skeletonColor = Color(0xFFE0E0E0);
@@ -22,7 +24,7 @@ class FobDetailView extends StatefulWidget {
 }
 
 class _FobDetailViewState extends State<FobDetailView> {
-  late Future<Fob> fobDetailsFuture;
+  late Future<FobWithDetails> fobDetailsFuture;
   
   final SizedBox fobPicture = SizedBox(
     width: double.infinity,
@@ -32,23 +34,15 @@ class _FobDetailViewState extends State<FobDetailView> {
   @override
   void initState() {
     super.initState();
-    fobDetailsFuture = fetchFobDetails(widget.fobId);
-  }
-
-  Future<Fob> fetchFobDetails(String fobId) async {
-    await Future.delayed(const Duration(seconds: 2)); // Simulate network delay
-    return Fountain(
-      id: fobId,
-      name: "Fountain $fobId",
-      userId: "Owner $fobId",
-      location: Location(
-        lat: 40.429052,
-        lng: -86.913124,
-      ),
-      info: FountainInfo(bottleFiller: true),
-      createdAt: (DateTime.now().microsecondsSinceEpoch / 1000).toInt(),
-      updatedAt: (DateTime.now().microsecondsSinceEpoch / 1000).toInt()
-    );
+    // Get access token
+    final tokenStore = useTokenStore();
+    fobDetailsFuture = AuthService.checkOrRefreshToken(tokenStore.state).then((tokens) {
+      if (tokens == null) {
+        debugPrint("Unable to fetch fob details: No valid token");
+        return Future.error("No valid token");
+      }
+      return getFobWithDetails(tokens.accessToken, widget.fobId);
+    });
   }
 
   Widget buildRatingCard(BuildContext context, {String? user, String? rating, bool isSkeleton = false}) {
@@ -130,11 +124,11 @@ class _FobDetailViewState extends State<FobDetailView> {
     );
   }
 
-  Widget buildFobDetails(Fob fob) {
+  Widget buildFobDetails(FobWithDetails fobWithDetails) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(fob.name, style: Theme.of(context).textTheme.headlineMedium),
+        Text(fobWithDetails.fob.name, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 15),
         Row(
           children: [
@@ -153,9 +147,9 @@ class _FobDetailViewState extends State<FobDetailView> {
               ),
             ),
             const SizedBox(width: 10),
-            Text(fob.userId, style: Theme.of(context).textTheme.bodyLarge),
+            Text(fobWithDetails.fob.userId, style: Theme.of(context).textTheme.bodyLarge),
             const Spacer(),
-            Text("${fob.averageRating} likes", style: Theme.of(context).textTheme.bodyLarge),
+            Text("${fobWithDetails.fob.averageRating} stars", style: Theme.of(context).textTheme.bodyLarge),
             const SizedBox(width: 10),
             CircleAvatar(
               radius: 25,
@@ -173,11 +167,11 @@ class _FobDetailViewState extends State<FobDetailView> {
         ListView.builder(
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          itemCount: fob.length,
+          itemCount: fobWithDetails.ratings.length,
           itemBuilder: (context, index) => buildRatingCard(
             context,
-            user: "User ${index + 1}",
-            rating: fob["ratings"][index],
+            user: fobWithDetails.ratings[index].userId,
+            rating: fobWithDetails.ratings[index].details.toString(),
           ),
         ),
       ],
@@ -210,7 +204,7 @@ class _FobDetailViewState extends State<FobDetailView> {
                 ),
                 child: SingleChildScrollView(
                   controller: scrollController,
-                  child: FutureBuilder<Map<String, dynamic>>(
+                  child: FutureBuilder<FobWithDetails>(
                     future: fobDetailsFuture,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
