@@ -1,4 +1,6 @@
 import 'package:hydrate_mobile_flutter/src/models/misc.dart';
+import 'package:hydrate_mobile_flutter/src/models/ratings.dart';
+import 'package:hydrate_mobile_flutter/src/models/pictures.dart';
 
 class FountainCreationDetails {
   final String name;
@@ -220,4 +222,34 @@ abstract class Fob {
   
   bool isFountain() => this is Fountain;
   bool isBathroom() => this is Bathroom;
+}
+
+class FobWithDetails {
+  final Fob fob;
+  final List<Rating> ratings;
+  final List<Picture> pictures;
+
+  const FobWithDetails({
+    required this.fob,
+    required this.ratings,
+    required this.pictures,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'fob': fob.toJson(),
+        'ratings': ratings.map((rating) => rating.toJson()).toList(),
+        'pictures': pictures.map((picture) => picture.toJson()).toList(),
+      };
+
+  factory FobWithDetails.fromJson(Map<String, dynamic> json) {
+    return FobWithDetails(
+      fob: Fob.fromJson(json['fob']),
+      ratings: (json['ratings'] as List<dynamic>)
+          .map((rating) => FobRating.fromJson(rating as Map<String, dynamic>))
+          .toList(),
+      pictures: (json['pictures'] as List<dynamic>)
+          .map((picture) => Picture.fromJson(picture as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 }
