@@ -1,6 +1,7 @@
 import 'package:hydrate_mobile_flutter/src/models/misc.dart';
 import 'package:hydrate_mobile_flutter/src/models/ratings.dart';
 import 'package:hydrate_mobile_flutter/src/models/pictures.dart';
+import 'package:hydrate_mobile_flutter/src/utils/constants.dart' as constants;
 
 class FountainCreationDetails {
   final String name;
@@ -25,82 +26,6 @@ class FountainInfo {
       {'bottle_filler': bool bottleFiller} => FountainInfo(bottleFiller: bottleFiller),
       _ => throw const FormatException('Failed to decode JSON FountainInfo!')
     };
-  }
-}
-
-class Fountain extends Fob {
-  final FountainInfo info;
-
-  const Fountain(
-      {required this.info,
-      required super.id,
-      required super.createdAt,
-      required super.updatedAt,
-      required super.name,
-      required super.location,
-      super.averageRating,
-      required super.userId});
-
-  @override
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> fob = super.toJson();
-    fob['info'] = info.toJson();
-    return fob;
-  }
-
-  factory Fountain.fromJson(Map<String, dynamic> json) {
-    return switch (json) {
-      {
-        'info': Map<String, dynamic> fountainInfo,
-        'id': String id,
-        'name': String name,
-        'user_id': String userId,
-        'created_at': int createdAt,
-        'updated_at': int updatedAt,
-        'location': Map<String, dynamic> location,
-        'average_rating': double? averageRating // Optional property
-      } =>
-        Fountain(
-            info: FountainInfo.fromJson(fountainInfo),
-            id: id,
-            name: name,
-            userId: userId,
-            createdAt: createdAt,
-            updatedAt: updatedAt,
-            averageRating: averageRating,
-            location: Location.fromJson(location)),
-      {
-        'info': Map<String, dynamic> fountainInfo,
-        'id': String id,
-        'name': String name,
-        'user_id': String userId,
-        'created_at': int createdAt,
-        'updated_at': int updatedAt,
-        'location': Map<String, dynamic> location
-      } =>
-        Fountain(
-            info: FountainInfo.fromJson(fountainInfo),
-            id: id,
-            name: name,
-            userId: userId,
-            createdAt: createdAt,
-            updatedAt: updatedAt,
-            averageRating: null, // Default to null if missing
-            location: Location.fromJson(location)),
-      _ => throw const FormatException('Failed to decode JSON Fountain!')
-    };
-  }
-
-  static Fountain empty() {
-    return Fountain(
-        id: "",
-        createdAt: 0,
-        updatedAt: 0,
-        name: "",
-        location: Location(lat: 0, lng: 0),
-        userId: "",
-        averageRating: 0,
-        info: FountainInfo(bottleFiller: false));
   }
 }
 
@@ -135,6 +60,7 @@ abstract class Fob {
   final int createdAt;
   final int updatedAt;
   final Location location;
+  final dynamic info; // Can be FountainInfo or BathroomInfo
   final double? averageRating;
 
   const Fob(
@@ -143,6 +69,7 @@ abstract class Fob {
       required this.userId,
       required this.createdAt,
       required this.updatedAt,
+      required this.info,
       this.averageRating,
       required this.location});
 
@@ -153,11 +80,12 @@ abstract class Fob {
         'created_at': createdAt,
         'updated_at': updatedAt,
         'average_rating': averageRating,
-        'location': location.toJson()
+        'location': location.toJson(),
+        'info': info.toJson()
       };
   
-  bool isFountain() => this is Fountain;
-  bool isBathroom() => this is Bathroom;
+  bool isFountain() => id.startsWith(constants.fountainIdPrefix);
+  bool isBathroom() => id.startsWith(constants.bathroomIdPrefix);
 }
 
 class FobWithDetails {
@@ -181,7 +109,7 @@ class FobWithDetails {
     return FobWithDetails(
       fob: Fob.fromJson(json['fob']),
       ratings: (json['ratings'] as List<dynamic>)
-          .map((rating) => FobRating.fromJson(rating as Map<String, dynamic>))
+          .map((rating) => Rating.fromJson(rating as Map<String, dynamic>))
           .toList(),
       pictures: (json['pictures'] as List<dynamic>)
           .map((picture) => Picture.fromJson(picture as Map<String, dynamic>))
