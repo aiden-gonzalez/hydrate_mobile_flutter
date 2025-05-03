@@ -270,25 +270,29 @@ class _FobCreateViewState extends State<FobCreateView> {
                         ElevatedButton(
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
-                              if (isFountain()) {
-                                var response = await createFountain(
-                                    useTokenStore().state.accessToken,
-                                    FountainCreationDetails(
-                                      name: name,
-                                      location: Location(
-                                            lat: selectedLocation?.latitude ?? widget.initialLocation.latitude,
-                                            lng: selectedLocation?.longitude ?? widget.initialLocation.longitude),
-                                      info: FountainInfo(
+                              var response = await createFob(
+                                  useTokenStore().state.accessToken,
+                                  FobCreationDetails(
+                                    type: isFountain() ? FobType.fountain : FobType.bathroom,
+                                    name: name,
+                                    location: Location(
+                                          lat: selectedLocation?.latitude ?? widget.initialLocation.latitude,
+                                          lng: selectedLocation?.longitude ?? widget.initialLocation.longitude),
+                                    info: isFountain() ? FountainInfo(
                                         bottleFiller: hasBottleFiller
+                                      ) : BathroomInfo(
+                                        gender: gender,
+                                        sanitaryProducts: hasPeriodProducts,
+                                        babyChanger: hasBabyChanger
                                       )
-                                    ));
-                                if (response.statusCode == 201) {
-                                  toast.showToast(context, "Fountain created successfully");
-                                  Navigator.pop(context); // Exit the page and return to the main map screen
-                                } else {
-                                  toast.showToast(context, "Failed to create fountain: ${response.body}");
-                                }
+                                  ));
+                              if (response.statusCode == 201) {
+                                toast.showToast(context, "Fob created successfully");
+                                Navigator.pop(context); // Exit the page and return to the main map screen
+                              } else {
+                                toast.showToast(context, "Failed to create fob: ${response.body}");
                               }
+                              
                             }
                           },
                           child: Text('Submit'),

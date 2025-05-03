@@ -16,7 +16,7 @@ TokenStore useTokenStore() => create(() => TokenStore());
 
 // Store for FOBs
 class FobStore extends Store<Fob> {
-  static final Fob emptyFob = Fountain.empty();
+  static final Fob emptyFob = Fob.empty();
 
   FobStore() : super(emptyFob);
 

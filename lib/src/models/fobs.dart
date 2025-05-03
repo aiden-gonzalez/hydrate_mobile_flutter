@@ -2,15 +2,29 @@ import 'package:hydrate_mobile_flutter/src/models/misc.dart';
 import 'package:hydrate_mobile_flutter/src/models/ratings.dart';
 import 'package:hydrate_mobile_flutter/src/utils/constants.dart' as constants;
 
-class FountainCreationDetails {
+enum FobType {
+  fountain,
+  bathroom,
+}
+
+class FobCreationDetails {
+  final FobType type;
   final String name;
   final Location location;
-  final FountainInfo info;
+  final dynamic info; // Can be FountainInfo or BathroomInfo
 
-  const FountainCreationDetails({required this.name, required this.location, required this.info});
+  const FobCreationDetails({
+    required this.type,
+    required this.name,
+    required this.location,
+    required this.info});
 
-  Map<String, dynamic> toJson() =>
-      {'name': name, 'location': location.toJson(), 'info': info.toJson()};
+  Map<String, dynamic> toJson() => {
+    'type': type.toString(),
+    'name': name,
+    'location': location.toJson(),
+    'info': info.toJson()
+  };
 }
 
 class FountainInfo {
@@ -109,6 +123,19 @@ class Fob {
       info: info,
       averageRating: json['average_rating'] as double?,
       location: Location.fromJson(json['location'] as Map<String, dynamic>)
+    );
+  }
+
+  static Fob empty() {
+    return Fob(
+      id: '',
+      name: '',
+      userId: '',
+      createdAt: 0,
+      updatedAt: 0,
+      info: FountainInfo(bottleFiller: false),
+      averageRating: null,
+      location: Location(lat: 0, lng: 0)
     );
   }
 }
