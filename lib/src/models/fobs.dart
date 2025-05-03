@@ -1,6 +1,5 @@
 import 'package:hydrate_mobile_flutter/src/models/misc.dart';
 import 'package:hydrate_mobile_flutter/src/models/ratings.dart';
-import 'package:hydrate_mobile_flutter/src/models/pictures.dart';
 import 'package:hydrate_mobile_flutter/src/utils/constants.dart' as constants;
 
 class FountainCreationDetails {
