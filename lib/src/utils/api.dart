@@ -43,23 +43,22 @@ Future<List<Fob>> getFobsInArea(String token, LatLng location, {int radiusInMete
     'radius': radiusInMeters.toString()
   };
 
-  // Wait for both calls to complete
-  final fobRequests = await Future.wait([
-    apiRequest(HttpMethod.get, "fountains", params: params, token: token),
-    apiRequest(HttpMethod.get, "bathrooms", params: params, token: token)
-  ]);
+  final fobsJson = await apiRequest(HttpMethod.get, "fobs", params: params, token: token);
 
-  debugPrint(fobRequests[0].body);
-  debugPrint(fobRequests[1].body);
+  final decodedFobs = 
+    (jsonDecode(fobsJson.body) as List)
+    .map((f) => Fob.fromJson(f))
+    .toList();
 
-  final fountains = (jsonDecode(fobRequests[0].body) as List)
-      .map((f) => Fountain.fromJson(f))
-      .toList();
-  final bathrooms = (jsonDecode(fobRequests[1].body) as List)
-      .map((b) => Bathroom.fromJson(b))
-      .toList();
+  return decodedFobs;
+}
 
-  return [...fountains, ...bathrooms];
+Future<FobWithDetails> getFobWithDetails(String token, String fobId) async {
+  final fobDetailsJson = await apiRequest(HttpMethod.get, "fobs/$fobId/details", token: token);
+
+  final decodedFobWithDetails = jsonDecode(fobDetailsJson.body) as Map<String, dynamic>;
+
+  return FobWithDetails.fromJson(decodedFobWithDetails);
 }
 
 enum HttpMethod { get, post }
