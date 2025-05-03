@@ -53,7 +53,7 @@ class BathroomInfo {
   }
 }
 
-abstract class Fob {
+class Fob {
   final String id;
   final String name;
   final String userId;
@@ -86,6 +86,32 @@ abstract class Fob {
   
   bool isFountain() => id.startsWith(constants.fountainIdPrefix);
   bool isBathroom() => id.startsWith(constants.bathroomIdPrefix);
+
+  factory Fob.fromJson(Map<String, dynamic> json) {
+    final id = json['id'] as String;
+    final info = json.containsKey('info')
+        ? (id.startsWith(constants.fountainIdPrefix)
+            ? FountainInfo.fromJson(json['info'] as Map<String, dynamic>)
+            : id.startsWith(constants.bathroomIdPrefix)
+                ? BathroomInfo.fromJson(json['info'] as Map<String, dynamic>)
+                : null)
+        : null;
+
+    if (info == null) {
+      throw const FormatException('Failed to decode JSON Fob!');
+    }
+
+    return Fob(
+      id: id,
+      name: json['name'] as String,
+      userId: json['user_id'] as String,
+      createdAt: json['created_at'] as int,
+      updatedAt: json['updated_at'] as int,
+      info: info,
+      averageRating: json['average_rating'] as double?,
+      location: Location.fromJson(json['location'] as Map<String, dynamic>)
+    );
+  }
 }
 
 class FobWithDetails {
