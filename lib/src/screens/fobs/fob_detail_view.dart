@@ -158,11 +158,11 @@ class _FobDetailViewState extends State<FobDetailView> {
         ListView.builder(
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          itemCount: fobWithDetails.ratings.length,
+          itemCount: fobWithDetails.ratingsWithDetails.length,
           itemBuilder: (context, index) => buildRatingCard(
             context,
-            user: fobWithDetails.ratings[index].userId,
-            rating: fobWithDetails.ratings[index].details.toString(),
+            user: fobWithDetails.ratingsWithDetails[index].user.username,
+            rating: fobWithDetails.ratingsWithDetails[index].rating.details.toString(),
           ),
         ),
       ],
