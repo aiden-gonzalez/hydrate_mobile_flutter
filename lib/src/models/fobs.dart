@@ -1,3 +1,4 @@
+import 'package:hydrate_mobile_flutter/src/models/auth.dart';
 import 'package:hydrate_mobile_flutter/src/models/misc.dart';
 import 'package:hydrate_mobile_flutter/src/models/ratings.dart';
 import 'package:hydrate_mobile_flutter/src/utils/constants.dart' as constants;
@@ -142,30 +143,34 @@ class Fob {
 
 class FobWithDetails {
   final Fob fob;
-  final List<Rating> ratings;
+  final User user;
   final List<Picture> pictures;
+  final List<RatingWithDetails> ratingsWithDetails;
 
   const FobWithDetails({
     required this.fob,
-    required this.ratings,
+    required this.user,
     required this.pictures,
+    required this.ratingsWithDetails
   });
 
   Map<String, dynamic> toJson() => {
         'fob': fob.toJson(),
-        'ratings': ratings.map((rating) => rating.toJson()).toList(),
+        'user': user.toJson(),
         'pictures': pictures.map((picture) => picture.toJson()).toList(),
+        'ratingsWithDetails': ratingsWithDetails.map((rwd) => rwd.toJson()).toList()
       };
 
   factory FobWithDetails.fromJson(Map<String, dynamic> json) {
     return FobWithDetails(
       fob: Fob.fromJson(json['fob']),
-      ratings: (json['ratings'] as List<dynamic>)
-          .map((rating) => Rating.fromJson(rating as Map<String, dynamic>))
-          .toList(),
+      user: User.fromJson(json['user']),
       pictures: (json['pictures'] as List<dynamic>)
           .map((picture) => Picture.fromJson(picture as Map<String, dynamic>))
           .toList(),
+      ratingsWithDetails: (json['ratingsWithDetails'] as List<dynamic>)
+          .map((rwd) => RatingWithDetails.fromJson(rwd as Map<String, dynamic>))
+          .toList()
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'package:hydrate_mobile_flutter/src/models/auth.dart';
+
 class BathroomRatingDetails {
   final int cleanliness;
   final int decor;
@@ -99,4 +101,26 @@ class Rating {
       updatedAt: json['updated_at'],
     );
   }
+}
+
+class RatingWithDetails {
+  final Rating rating;
+  final User user;
+
+  const RatingWithDetails({
+    required this.rating,
+    required this.user,
+  });
+
+  factory RatingWithDetails.fromJson(Map<String, dynamic> json) {
+    return RatingWithDetails(
+      rating: Rating.fromJson(json['rating'] as Map<String, dynamic>),
+      user: User.fromJson(json['user'] as Map<String, dynamic>),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'rating': rating.toJson(),
+    'user': user.toJson(),
+  };
 }
