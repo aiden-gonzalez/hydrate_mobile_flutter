@@ -20,7 +20,7 @@ class FobCreationDetails {
     required this.info});
 
   Map<String, dynamic> toJson() => {
-    'type': type.toString(),
+    'type': type.toString().split('.').last,
     'name': name,
     'location': location.toJson(),
     'info': info.toJson()

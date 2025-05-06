@@ -103,15 +103,6 @@ class _FobDetailViewState extends State<FobDetailView> {
           padding: EdgeInsets.symmetric(vertical: 15),
           child: Divider(height: 4),
         ),
-        Container(height: 20, width: 100, color: skeletonColor),
-        const SizedBox(height: 10),
-        Container(height: 50, width: double.infinity, color: skeletonColor),
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 15),
-          child: Divider(height: 4),
-        ),
-        Container(height: 20, width: 100, color: skeletonColor),
-        const SizedBox(height: 10),
         Text("Ratings", style: Theme.of(context).textTheme.headlineLarge),
         const SizedBox(height: 10),
         ListView.builder(
