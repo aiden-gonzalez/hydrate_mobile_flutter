@@ -49,257 +49,277 @@ class _FobCreateViewState extends State<FobCreateView> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Text> types = [
-      Text(fountainLabel, style: Theme.of(context).textTheme.titleMedium),
-      Text(bathroomLabel, style: Theme.of(context).textTheme.titleMedium)
-    ];
-
-    bool isFountain() {
-      return types[_selectedFobType.indexOf(true)].data == fountainLabel;
-    }
-
-    final ImagePicker picker = ImagePicker();
-
     return SafeArea(
       top: false,
       child: Scaffold(
-          appBar: AppBar(title: const Text('Contribute')),
-          body: SingleChildScrollView(
-              child: Center(
+        appBar: AppBar(title: const Text('Contribute')),
+        body: SingleChildScrollView(
+          child: Center(
             child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 5),
+                _buildFobTypeToggle(),
+                const SizedBox(height: 10),
+                _buildMap(),
+                const SizedBox(height: 10),
+                _buildImagePicker(),
+                const SizedBox(height: 10),
+                _buildFobForm(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFobTypeToggle() {
+    final List<Text> types = [
+      Text(fountainLabel, style: Theme.of(context).textTheme.titleMedium),
+      Text(bathroomLabel, style: Theme.of(context).textTheme.titleMedium),
+    ];
+
+    return ToggleButtons(
+      direction: Axis.horizontal,
+      onPressed: (int index) {
+        setState(() {
+          // The button that is tapped is set to true, and the others to false.
+          for (int i = 0; i < _selectedFobType.length; i++) {
+            _selectedFobType[i] = i == index;
+          }
+        });
+      },
+      borderRadius: const BorderRadius.all(Radius.circular(8)),
+      constraints: BoxConstraints(
+        minHeight: 50.0,
+        minWidth: (MediaQuery.of(context).size.width) / 3,
+      ),
+      isSelected: _selectedFobType,
+      children: types,
+    );
+  }
+
+  Widget _buildMap() {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Container(
+        height: 300,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.0),
+          color: Theme.of(context).highlightColor,
+        ),
+        child: FlutterMap(
+          options: MapOptions(
+            initialCenter: widget.initialLocation,
+            initialZoom: widget.initialZoom,
+            onPositionChanged: (position, hasGesture) {
+              if (hasGesture) {
+                setState(() {
+                  selectedLocation = position.center;
+                });
+              }
+            },
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+              userAgentPackageName: "dev.fleaflet.flutter_map.example",
+            ),
+            MarkerLayer(
+              markers: [
+                Marker(
+                  point: selectedLocation ?? widget.initialLocation,
+                  width: 50,
+                  height: 50,
+                  alignment: Alignment.topCenter,
+                  child: const Icon(
+                    Icons.location_pin,
+                    size: 50,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImagePicker() {
+    final ImagePicker picker = ImagePicker();
+
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.0),
+          color: Theme.of(context).highlightColor,
+        ),
+        child: imagePath == null
+            ? Column(
                 children: [
-                  SizedBox(height: 5),
-                  // Single select for FoB type
-                  ToggleButtons(
-                      direction: Axis.horizontal,
-                      onPressed: (int index) {
-                        setState(() {
-                          // The button that is tapped is set to true, and the others to false.
-                          for (int i = 0; i < _selectedFobType.length; i++) {
-                            _selectedFobType[i] = i == index;
-                          }
-                        });
-                      },
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      constraints: BoxConstraints(
-                          minHeight: 50.0, minWidth: (MediaQuery.of(context).size.width) / 3),
-                      isSelected: _selectedFobType,
-                      children: types),
-                  SizedBox(height: 10),
-                  // Map for selecting location
-                  Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: Container(
-                      height: 300,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10.0),
-                        color: Theme.of(context).highlightColor,
-                      ),
-                      child: FlutterMap(
-                        options: MapOptions(
-                          initialCenter: widget.initialLocation,
-                          initialZoom: widget.initialZoom,
-                          onPositionChanged: (position, hasGesture) {
-                            if (hasGesture) {
-                              setState(() {
-                                selectedLocation = position.center;
-                              });
-                            }
-                          },
+                  InkWell(
+                    onTap: () async {
+                      final picture = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TakePictureScreen(camera: widget.camera),
                         ),
-                        children: [
-                          TileLayer(
-                            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                            userAgentPackageName: "dev.fleaflet.flutter_map.example",
-                          ),
-                          MarkerLayer(
-                            markers: [
-                              Marker(
-                                point: selectedLocation ?? widget.initialLocation,
-                                width: 50,
-                                height: 50,
-                                alignment: Alignment.topCenter,
-                                child: Icon(
-                                  Icons.location_pin,
-                                  size: 50,
-                                  color: Colors.red,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                      );
+                      debugPrint(picture);
+                      setState(() {
+                        imagePath = picture;
+                      });
+                    },
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 200,
+                      child: Center(
+                        child: Text(
+                          "Tap to take photo...",
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
                       ),
                     ),
                   ),
-                  SizedBox(height: 10),
-                  // Add picture
-                  Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10.0),
-                            color: Theme.of(context).highlightColor),
-                        child: imagePath == null
-                            ? Column(
-                              children: [
-                                InkWell(
-                                  onTap: () async {
-                                    final picture = await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              TakePictureScreen(camera: widget.camera)),
-                                    );
-                                    debugPrint(picture);
-                                    setState(() {
-                                      imagePath = picture;
-                                    });
-                                  },
-                                  child: SizedBox(
-                                      width: double.infinity,
-                                      height: 200,
-                                      child: Center(
-                                          child: Text("Tap to take photo...",
-                                              style: Theme.of(context).textTheme.headlineSmall))),
-                                ),
-                                Divider(),
-                                InkWell(
-                                  onTap: () async {
-                                    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
-                                    setState(() {
-                                      imagePath = pickedImage?.path;
-                                    });
-                                  },
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    height: 150,
-                                    child: Center(
-                                      child: Text("Tap to select from gallery...",
-                                      style: Theme.of(context).textTheme.headlineSmall)
-                                    )
-                                  )
-                                )
-                                ],
-                            )
-                            : Image.file(File(imagePath!),
-                            height: 450)),
-                  ),
-                  // Form for entering fob information
-                  Form(
-                      key: _formKey,
-                      child: Column(spacing: 10, children: [
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          child: TextFormField(
-                              decoration: InputDecoration(labelText: "Name"),
-                              onChanged: (value) {
-                                setState(() => name = value);
-                              },
-                              // The validator receives the text that the user has entered.
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter a name';
-                                }
-                                return null;
-                              }),
+                  const Divider(),
+                  InkWell(
+                    onTap: () async {
+                      final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+                      setState(() {
+                        imagePath = pickedImage?.path;
+                      });
+                    },
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 150,
+                      child: Center(
+                        child: Text(
+                          "Tap to select from gallery...",
+                          style: Theme.of(context).textTheme.headlineSmall,
                         ),
-                        if (isFountain())
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: CheckboxListTile(
-                                title: const Text("Has Bottle Filler"),
-                                value: hasBottleFiller,
-                                onChanged: (bool? value) {
-                                  setState(() => hasBottleFiller = value!);
-                                },
-                                secondary: const Icon(Icons.water_drop)),
-                          ),
-                        if (!isFountain())
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: DropdownButtonFormField<String>(
-                              value: gender,
-                              decoration: InputDecoration(labelText: 'Gender'),
-                              onChanged: (value) {
-                                setState(() {
-                                  gender = value!;
-                                });
-                              },
-                              items: ['Male', 'Female', 'All Gender']
-                                  .map((label) => DropdownMenuItem(
-                                        value: label,
-                                        child: Text(label),
-                                      ))
-                                  .toList(),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please select a gender';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        if (!isFountain())
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: CheckboxListTile(
-                                title: Text('Period Products Available'),
-                                value: hasPeriodProducts,
-                                onChanged: (bool? value) {
-                                  setState(() {
-                                    hasPeriodProducts = value!;
-                                  });
-                                },
-                                secondary: Icon(Icons.spa)),
-                          ),
-                        if (!isFountain())
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: CheckboxListTile(
-                                title: Text('Baby Changer Available'),
-                                value: hasBabyChanger,
-                                onChanged: (bool? value) {
-                                  setState(() {
-                                    hasBabyChanger = value!;
-                                  });
-                                },
-                                secondary: Icon(Icons.baby_changing_station)),
-                          ),
-                        ElevatedButton(
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              var response = await createFob(
-                                  useTokenStore().state.accessToken,
-                                  FobCreationDetails(
-                                    type: isFountain() ? FobType.fountain : FobType.bathroom,
-                                    name: name,
-                                    location: Location(
-                                          lat: selectedLocation?.latitude ?? widget.initialLocation.latitude,
-                                          lng: selectedLocation?.longitude ?? widget.initialLocation.longitude),
-                                    info: isFountain() ? FountainInfo(
-                                        bottleFiller: hasBottleFiller
-                                      ) : BathroomInfo(
-                                        gender: gender,
-                                        sanitaryProducts: hasPeriodProducts,
-                                        babyChanger: hasBabyChanger
-                                      )
-                                  ));
-                              if (response.statusCode == 201) {
-                                toast.showToast(context, "Fob created successfully");
-                                Navigator.pop(context); // Exit the page and return to the main map screen
-                              } else {
-                                toast.showToast(context, "Failed to create fob: ${response.body}");
-                              }
-                              
-                            }
-                          },
-                          child: Text('Submit'),
-                        )
-                      ]))
-                ]),
-          ))),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : Image.file(File(imagePath!), height: 450),
+      ),
     );
+  }
+
+  Widget _buildFobForm() {
+    final isFountain = _selectedFobType[0];
+
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: TextFormField(
+              decoration: const InputDecoration(labelText: "Name"),
+              onChanged: (value) => setState(() => name = value),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a name';
+                }
+                return null;
+              },
+            ),
+          ),
+          if (isFountain)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: CheckboxListTile(
+                title: const Text("Has Bottle Filler"),
+                value: hasBottleFiller,
+                onChanged: (bool? value) => setState(() => hasBottleFiller = value!),
+                secondary: const Icon(Icons.water_drop),
+              ),
+            ),
+          if (!isFountain)
+            ..._buildBathroomFields(),
+          ElevatedButton(
+            onPressed: _submitFob,
+            child: const Text('Submit'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildBathroomFields() {
+    return [
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: DropdownButtonFormField<String>(
+          value: gender,
+          decoration: const InputDecoration(labelText: 'Gender'),
+          onChanged: (value) => setState(() => gender = value!),
+          items: ['Male', 'Female', 'All Gender']
+              .map((label) => DropdownMenuItem(value: label, child: Text(label)))
+              .toList(),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please select a gender';
+            }
+            return null;
+          },
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: CheckboxListTile(
+          title: const Text('Period Products Available'),
+          value: hasPeriodProducts,
+          onChanged: (bool? value) => setState(() => hasPeriodProducts = value!),
+          secondary: const Icon(Icons.spa),
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: CheckboxListTile(
+          title: const Text('Baby Changer Available'),
+          value: hasBabyChanger,
+          onChanged: (bool? value) => setState(() => hasBabyChanger = value!),
+          secondary: const Icon(Icons.baby_changing_station),
+        ),
+      ),
+    ];
+  }
+
+  Future<void> _submitFob() async {
+    if (_formKey.currentState!.validate()) {
+      final isFountain = _selectedFobType[0];
+      final response = await createFob(
+        useTokenStore().state.accessToken,
+        FobCreationDetails(
+          type: isFountain ? FobType.fountain : FobType.bathroom,
+          name: name,
+          location: Location(
+            lat: selectedLocation?.latitude ?? widget.initialLocation.latitude,
+            lng: selectedLocation?.longitude ?? widget.initialLocation.longitude,
+          ),
+          info: isFountain
+              ? FountainInfo(bottleFiller: hasBottleFiller)
+              : BathroomInfo.from(
+                  gender: gender,
+                  sanitaryProducts: hasPeriodProducts,
+                  babyChanger: hasBabyChanger,
+                ),
+        ),
+      );
+
+      if (response.statusCode == 201) {
+        toast.showToast(context, "Fob created successfully");
+        Navigator.pop(context);
+      } else {
+        toast.showToast(context, "Failed to create fob: ${response.body}");
+      }
+    }
   }
 }
