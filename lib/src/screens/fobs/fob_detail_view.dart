@@ -1,5 +1,7 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
+import 'package:hydrate_mobile_flutter/src/screens/fobs/fob_rating_create_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/profile_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/utils/api.dart';
@@ -14,9 +16,10 @@ const Color likesBackgroundColor = Colors.amber;
 const Color likesIconColor = Colors.red;
 
 class FobDetailView extends StatefulWidget {
-  const FobDetailView({super.key, required this.settingsController, required this.fobId});
+  const FobDetailView({super.key, required this.settingsController, required this.camera, required this.fobId});
 
   final SettingsController settingsController;
+  final CameraDescription camera;
   final String fobId;
 
   @override
@@ -138,14 +141,24 @@ class _FobDetailViewState extends State<FobDetailView> {
               ),
             ),
             const SizedBox(width: 10),
-            Text(fobWithDetails.fob.userId, style: Theme.of(context).textTheme.bodyLarge),
-            const Spacer(),
-            Text("${fobWithDetails.fob.averageRating} stars", style: Theme.of(context).textTheme.bodyLarge),
+            Expanded(
+              child: Text(
+                fobWithDetails.user.username,
+                style: Theme.of(context).textTheme.bodyLarge,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
+            const SizedBox(width: 10), // Replace Spacer with SizedBox for consistent spacing
+            Text(
+              "${fobWithDetails.fob.averageRating ?? "No"} stars",
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
             const SizedBox(width: 10),
             CircleAvatar(
               radius: 25,
               backgroundColor: likesBackgroundColor,
-              child: Icon(Icons.favorite, color: likesIconColor),
+              child: Icon(Icons.star, color: likesIconColor),
             ),
           ],
         ),
@@ -158,12 +171,22 @@ class _FobDetailViewState extends State<FobDetailView> {
         ListView.builder(
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          itemCount: fobWithDetails.ratingsWithDetails.length,
-          itemBuilder: (context, index) => buildRatingCard(
-            context,
-            user: fobWithDetails.ratingsWithDetails[index].user.username,
-            rating: fobWithDetails.ratingsWithDetails[index].rating.details.toString(),
-          ),
+          itemCount: fobWithDetails.ratingsWithDetails.isEmpty ? 1 : fobWithDetails.ratingsWithDetails.length,
+          itemBuilder: (context, index) {
+            if (fobWithDetails.ratingsWithDetails.isEmpty) {
+              return Center(
+                child: Text(
+                  "No ratings available",
+                  style: Theme.of(context).textTheme.bodyLarge,
+                )
+              );
+            }
+            return buildRatingCard(
+              context,
+              user: fobWithDetails.ratingsWithDetails[index].user.username,
+              rating: fobWithDetails.ratingsWithDetails[index].rating.details.toString(),
+            );
+          },
         ),
       ],
     );
@@ -212,6 +235,33 @@ class _FobDetailViewState extends State<FobDetailView> {
             },
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        label: const Text("Add Rating"),
+        onPressed: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FobRatingCreateView(
+                camera: widget.camera,
+                fobId: widget.fobId
+              )
+            )
+          );
+          // Refresh the ratings list after returning from the rating creation page
+          setState(() {
+            final tokenStore = useTokenStore();
+            fobDetailsFuture = AuthService.checkOrRefreshToken(tokenStore.state).then((tokens) {
+              if (tokens == null) {
+                debugPrint("Unable to fetch fob details: No valid token");
+                return Future.error("No valid token");
+              }
+              return getFobWithDetails(tokens.accessToken, widget.fobId);
+            });
+          });
+        },
+        tooltip: 'Add Rating',
+        icon: const Icon(Icons.add),
       ),
     );
   }

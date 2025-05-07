@@ -70,6 +70,7 @@ class _OpenMapViewState extends State<OpenMapView> {
                 MaterialPageRoute(
                   builder: (context) => FobDetailView(
                     settingsController: widget.settingsController,
+                    camera: widget.camera,
                     fobId: fob.id
                   )
                 )
@@ -171,6 +172,7 @@ class _OpenMapViewState extends State<OpenMapView> {
               child: FobCardListView(
                 fobs: fobs,
                 fobsCenter: fobsCenter,
+                camera: widget.camera,
                 settingsController: widget.settingsController,
               ),
             ),

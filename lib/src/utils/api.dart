@@ -6,6 +6,8 @@ import 'package:hydrate_mobile_flutter/src/utils/env.dart';
 import 'dart:convert';
 import 'package:latlong2/latlong.dart';
 
+enum HttpMethod { get, post }
+
 // AUTH ENDPOINTS
 
 Future<http.Response> login(String email, String password) {
@@ -31,6 +33,7 @@ Future<http.Response> sendPasswordResetEmail(String email) {
 }
 
 // FOB ENDPOINTS
+
 Future<http.Response> createFob(String token, FobCreationDetails fobCreationDetails) {
   Map<String, dynamic> request = fobCreationDetails.toJson();
   return apiRequest(HttpMethod.post, "fobs", body: request, token: token);
@@ -61,7 +64,12 @@ Future<FobWithDetails> getFobWithDetails(String token, String fobId) async {
   return FobWithDetails.fromJson(decodedFobWithDetails);
 }
 
-enum HttpMethod { get, post }
+// RATING ENDPOINTS
+Future<http.Response> createRating(String token, String fobId, dynamic ratingDetails) {
+  Map<String, dynamic> request = ratingDetails.toJson();
+
+  return apiRequest(HttpMethod.post, "fobs/$fobId/ratings", body: request, token: token);
+}
 
 Future<http.Response> apiRequest(HttpMethod method, String path,
     {Map<String, String>? params, Object? body, String? token}) {

@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
@@ -10,11 +11,13 @@ class FobCardListView extends StatelessWidget {
     super.key,
     required this.fobs,
     required this.fobsCenter,
+    required this.camera,
     required this.settingsController,
   });
 
   final List<Fob> fobs;
   final LatLng fobsCenter;
+  final CameraDescription camera;
   final SettingsController settingsController;
 
   @override
@@ -33,6 +36,7 @@ class FobCardListView extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => FobDetailView(
                     settingsController: settingsController,
+                    camera: camera,
                     fobId: fob.id,
                   ),
                 ),
