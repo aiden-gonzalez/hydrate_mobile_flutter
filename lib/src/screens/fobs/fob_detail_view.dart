@@ -7,6 +7,7 @@ import 'package:hydrate_mobile_flutter/src/screens/profile_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/utils/api.dart';
 import 'package:hydrate_mobile_flutter/src/utils/auth.dart';
+import 'package:hydrate_mobile_flutter/src/utils/constants.dart' as constants;
 import 'package:hydrate_mobile_flutter/src/utils/stores.dart';
 import 'package:hydrate_mobile_flutter/src/utils/strings.dart';
 
@@ -244,7 +245,7 @@ class _FobDetailViewState extends State<FobDetailView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Fob'),
+        title: Text(widget.fobId.startsWith(constants.fountainIdPrefix) ? "Fountain" : "Bathroom"),
       ),
       body: Stack(
         children: [

@@ -66,10 +66,11 @@ class BathroomInfo {
   }
 
   static BathroomGender genderFromString(String gender) {
-    return switch (gender) {
+    return switch (gender.toLowerCase()) {
       "male" => BathroomGender.male,
       "female" => BathroomGender.female,
       "all-gender" => BathroomGender.allGender,
+      "all gender" => BathroomGender.allGender,
       _ => throw const FormatException('Failed to convert bathroom gender from string!')
     };
   }
