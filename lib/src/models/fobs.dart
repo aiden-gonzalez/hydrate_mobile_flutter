@@ -75,7 +75,7 @@ class Fob {
   final int updatedAt;
   final Location location;
   final dynamic info; // Can be FountainInfo or BathroomInfo
-  final double? averageRating;
+  final num? averageRating;
 
   const Fob(
       {required this.id,
@@ -122,7 +122,7 @@ class Fob {
       createdAt: json['created_at'] as int,
       updatedAt: json['updated_at'] as int,
       info: info,
-      averageRating: json['average_rating'] as double?,
+      averageRating: json['average_rating'] as num?,
       location: Location.fromJson(json['location'] as Map<String, dynamic>)
     );
   }

@@ -85,7 +85,7 @@ class FobCardListView extends StatelessWidget {
                     Row(
                       children: List.generate(5, (index) {
                         return Icon(
-                          index + 1 == fob.averageRating?.round()
+                          index < (fob.averageRating?.round() ?? 0)
                               ? Icons.star
                               : Icons.star_border,
                           size: 16,
