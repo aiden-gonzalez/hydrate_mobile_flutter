@@ -8,6 +8,12 @@ enum FobType {
   bathroom,
 }
 
+enum BathroomGender {
+  male,
+  female,
+  allGender
+}
+
 class FobCreationDetails {
   final FobType type;
   final String name;
@@ -44,15 +50,44 @@ class FountainInfo {
 }
 
 class BathroomInfo {
-  final String gender;
+  final BathroomGender gender;
   final bool sanitaryProducts;
   final bool babyChanger;
 
   const BathroomInfo(
-      {required this.gender, required this.sanitaryProducts, required this.babyChanger});
+    {required this.gender, required this.sanitaryProducts, required this.babyChanger});
+
+  factory BathroomInfo.from({required String gender, required bool sanitaryProducts, required bool babyChanger}) {
+    return BathroomInfo(
+      gender: genderFromString(gender),
+      sanitaryProducts: sanitaryProducts,
+      babyChanger: babyChanger
+    );
+  }
+
+  static BathroomGender genderFromString(String gender) {
+    return switch (gender) {
+      "male" => BathroomGender.male,
+      "female" => BathroomGender.female,
+      "all-gender" => BathroomGender.allGender,
+      _ => throw const FormatException('Failed to convert bathroom gender from string!')
+    };
+  }
+
+  String genderToString(BathroomGender gender) {
+    return switch (gender) {
+      BathroomGender.male => "male",
+      BathroomGender.female => "female",
+      BathroomGender.allGender => "all-gender"
+    };
+  }
 
   Map<String, dynamic> toJson() =>
-      {'gender': gender, 'sanitary_products': sanitaryProducts, 'baby_changer': babyChanger};
+    {
+      'gender': genderToString(gender),
+      'sanitary_products': sanitaryProducts,
+      'baby_changer': babyChanger
+    };
 
   factory BathroomInfo.fromJson(Map<String, dynamic> json) {
     return switch (json) {
@@ -61,7 +96,11 @@ class BathroomInfo {
         'sanitary_products': bool sanitaryProducts,
         'baby_changer': bool babyChanger
       } =>
-        BathroomInfo(gender: gender, sanitaryProducts: sanitaryProducts, babyChanger: babyChanger),
+        BathroomInfo(
+          gender: genderFromString(gender),
+          sanitaryProducts: sanitaryProducts,
+          babyChanger: babyChanger
+        ),
       _ => throw const FormatException('Failed to decode JSON BathroomInfo!')
     };
   }
