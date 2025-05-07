@@ -1,12 +1,14 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
+import 'package:hydrate_mobile_flutter/src/models/ratings.dart';
 import 'package:hydrate_mobile_flutter/src/screens/fobs/fob_rating_create_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/profile_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/utils/api.dart';
 import 'package:hydrate_mobile_flutter/src/utils/auth.dart';
 import 'package:hydrate_mobile_flutter/src/utils/stores.dart';
+import 'package:hydrate_mobile_flutter/src/utils/strings.dart';
 
 // Define color constants
 const Color skeletonColor = Color(0xFFE0E0E0);
@@ -48,7 +50,7 @@ class _FobDetailViewState extends State<FobDetailView> {
     });
   }
 
-  Widget buildRatingCard(BuildContext context, {String? user, String? rating, bool isSkeleton = false}) {
+  Widget buildSkeletonRatingCard(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Card(
@@ -58,23 +60,70 @@ class _FobDetailViewState extends State<FobDetailView> {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor: isSkeleton ? skeletonColor : starBackgroundColor,
-                child: isSkeleton
-                    ? null
-                    : Icon(Icons.star, color: starIconColor),
+                backgroundColor: skeletonColor,
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    isSkeleton
-                        ? Container(height: 15, width: 100, color: skeletonColor)
-                        : Text(user ?? "", style: Theme.of(context).textTheme.bodyLarge),
+                    Container(height: 15, width: 100, color: skeletonColor),
                     const SizedBox(height: 5),
-                    isSkeleton
-                        ? Container(height: 15, width: 50, color: skeletonColor)
-                        : Text(rating ?? "", style: Theme.of(context).textTheme.bodyMedium),
+                    Container(height: 15, width: 50, color: skeletonColor),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildRatingCard(BuildContext context, {required RatingWithDetails ratingWithDetails}) {
+    Map<String, dynamic> ratingDetails = ratingWithDetails.rating.details.toJson();
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: starBackgroundColor,
+                child: Icon(Icons.star, color: starIconColor),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ratingWithDetails.user.username,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: 5),
+                    for (var property in ratingDetails.entries)
+                      Row(
+                        children: [
+                          ...[
+                            Text(
+                              "${property.key.capitalize()}: ",
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                            )
+                          ],
+                          ...List.generate(5, (index) {
+                            return Icon(
+                              index < (property.value ?? 0)
+                                  ? Icons.star
+                                  : Icons.star_border,
+                              size: 16,
+                              color: Colors.amber,
+                            );
+                          }),
+                        ],
+                      )
                   ],
                 ),
               ),
@@ -112,7 +161,7 @@ class _FobDetailViewState extends State<FobDetailView> {
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           itemCount: 4,
-          itemBuilder: (context, index) => buildRatingCard(context, isSkeleton: true),
+          itemBuilder: (context, index) => buildSkeletonRatingCard(context),
         ),
       ],
     );
@@ -183,8 +232,7 @@ class _FobDetailViewState extends State<FobDetailView> {
             }
             return buildRatingCard(
               context,
-              user: fobWithDetails.ratingsWithDetails[index].user.username,
-              rating: fobWithDetails.ratingsWithDetails[index].rating.details.toString(),
+              ratingWithDetails: fobWithDetails.ratingsWithDetails[index]
             );
           },
         ),
