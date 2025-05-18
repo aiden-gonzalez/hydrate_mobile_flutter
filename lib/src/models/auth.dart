@@ -93,25 +93,6 @@ class AuthSuccessResponse {
   }
 }
 
-class HashedPassword {
-  final String hashPass;
-  final String hashSalt;
-
-  const HashedPassword({required this.hashPass, required this.hashSalt});
-
-  factory HashedPassword.fromJson(Map<String, dynamic> json) {
-    return HashedPassword(
-      hashPass: json['hash_pass'] as String,
-      hashSalt: json['hash_salt'] as String,
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-    'hash_pass': hashPass,
-    'hash_salt': hashSalt,
-  };
-}
-
 class Profile {
   final String fullName;
   final String pictureLink;
@@ -135,7 +116,6 @@ class User {
   final String id;
   final String username;
   final String email;
-  final HashedPassword hashedPassword;
   final Profile profile;
   final int createdAt;
   final int updatedAt;
@@ -144,7 +124,6 @@ class User {
     required this.id,
     required this.username,
     required this.email,
-    required this.hashedPassword,
     required this.profile,
     required this.createdAt,
     required this.updatedAt,
@@ -155,7 +134,6 @@ class User {
       id: json['id'] as String,
       username: json['username'] as String,
       email: json['email'] as String,
-      hashedPassword: HashedPassword.fromJson(json['hashed_password'] as Map<String, dynamic>),
       profile: Profile.fromJson(json['profile'] as Map<String, dynamic>),
       createdAt: json['created_at'] as int,
       updatedAt: json['updated_at'] as int,
@@ -166,7 +144,6 @@ class User {
     'id': id,
     'username': username,
     'email': email,
-    'hashed_password': hashedPassword.toJson(),
     'profile': profile.toJson(),
     'created_at': createdAt,
     'updated_at': updatedAt,
