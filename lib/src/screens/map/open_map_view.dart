@@ -122,7 +122,10 @@ class _OpenMapViewState extends State<OpenMapView> {
       debounceTimer?.cancel();
 
       debounceTimer = Timer(const Duration(milliseconds: 500), () {
-        fetchMarkers(mapController.camera.center, getMapRadius(mapController.camera.visibleBounds));
+        fetchMarkers(
+          mapController.camera.center,
+          getMapRadius(mapController.camera.visibleBounds)
+        );
       });
     }
   }
@@ -158,8 +161,17 @@ class _OpenMapViewState extends State<OpenMapView> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => FobCreateView(camera: widget.camera, initialLocation: mapController.camera.center, initialZoom: mapController.camera.zoom)),
-                  );
+                    MaterialPageRoute(builder: (context) => FobCreateView(
+                      camera: widget.camera,
+                      initialLocation: mapController.camera.center,
+                      initialZoom: mapController.camera.zoom
+                    )),
+                  ).then((_) => {
+                    fetchMarkers(
+                      mapController.camera.center,
+                      getMapRadius(mapController.camera.visibleBounds)
+                    )
+                  });
                 },
                 label: const Text("Contribute"),
                 icon: const Icon(Icons.add),
