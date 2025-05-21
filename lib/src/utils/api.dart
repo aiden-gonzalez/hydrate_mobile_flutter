@@ -78,6 +78,12 @@ Future<http.Response> getUploadUrl(String token, String fobId) {
   return apiRequest(HttpMethod.get, "fobs/$fobId/pictures/upload", token: token);
 }
 
+Future<http.Response> updatePictureStatus(String token, String pictureId, bool pending) {
+  Map<String, dynamic> request = {'pending': pending};
+
+  return apiRequest(HttpMethod.put, "pictures/$pictureId", body: request, token: token);
+}
+
 Future<http.Response> deletePicture(String token, String pictureId) {
   return apiRequest(HttpMethod.delete, "pictures/$pictureId", token: token);
 }

@@ -339,16 +339,29 @@ class _FobCreateViewState extends State<FobCreateView> {
         // Now upload the image using that URL
         final uploadResponse = await uploadPicture(imagePath!, File(imagePath!));
 
+        final signedPictureUrl = PictureSignedUrl.fromJson(
+            jsonDecode(uploadUrlResponse.body) as Map<String, dynamic>
+          );
+
         if (uploadResponse.statusCode != 200) {
           toast.showToast(context, "Failed to upload image: ${await uploadResponse.stream.bytesToString()}");
           // Try to tell the server to delete the picture
-          final signedPictureUrl = PictureSignedUrl.fromJson(
-            jsonDecode(uploadUrlResponse.body) as Map<String, dynamic>
-          );
           await deletePicture(
             useTokenStore().state.accessToken,
             signedPictureUrl.pictureId
           );
+          return;
+        }
+
+        // Finally, tell the server the picture was successfully uploaded
+        final updateResponse = await updatePictureStatus(
+          useTokenStore().state.accessToken,
+          signedPictureUrl.pictureId,
+          false
+        );
+        
+        if (updateResponse.statusCode != 200) {
+          toast.showToast(context, "Failed to update picture status: ${updateResponse.body}");
           return;
         }
       }
