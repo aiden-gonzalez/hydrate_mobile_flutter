@@ -73,3 +73,33 @@ class Picture {
     };
   }
 }
+
+class PictureSignedUrl {
+  final String pictureId; // ID of the picture
+  final String signedUrl; // Signed URL to upload the picture
+  final int? expires; // Expiration time of the signed URL in Unix epoch milliseconds
+
+  PictureSignedUrl({
+    required this.pictureId,
+    required this.signedUrl,
+    required this.expires
+  });
+
+  // Add a factory constructor to parse from JSON
+  factory PictureSignedUrl.fromJson(Map<String, dynamic> json) {
+    return PictureSignedUrl(
+      pictureId: json['picture_id'] as String,
+      signedUrl: json['signed_url'] as String,
+      expires: json['expires'] as int?
+    );
+  }
+
+  // Add a method to convert to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'picture_id': pictureId,
+      'signed_url': signedUrl,
+      'expires': expires
+    };
+  }
+}
