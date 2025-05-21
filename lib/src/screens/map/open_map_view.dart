@@ -166,11 +166,13 @@ class _OpenMapViewState extends State<OpenMapView> {
                       initialLocation: mapController.camera.center,
                       initialZoom: mapController.camera.zoom
                     )),
-                  ).then((_) => {
-                    fetchMarkers(
-                      mapController.camera.center,
-                      getMapRadius(mapController.camera.visibleBounds)
-                    )
+                  ).then((success) => {
+                    if (success != null && success) {
+                      fetchMarkers(
+                        mapController.camera.center,
+                        getMapRadius(mapController.camera.visibleBounds)
+                      )
+                    }
                   });
                 },
                 label: const Text("Contribute"),

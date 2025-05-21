@@ -365,7 +365,7 @@ class _FobCreateViewState extends State<FobCreateView> {
 
       // Everything went well, show a success message and pop
       toast.showToast(context, "Fob created successfully");
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     }
   }
 }
