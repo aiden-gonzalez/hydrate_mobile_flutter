@@ -1,5 +1,12 @@
 extension StringExtension on String {
-    String capitalize() {
-      return "${this[0].toUpperCase()}${this.substring(1).toLowerCase()}";
-    }
+  String capitalize() {
+    final thisString = this;
+    return "${thisString[0].toUpperCase()}${thisString.substring(1).toLowerCase()}";
+  }
+
+  String getFileExtension() {
+    final thisString = this;
+    final extension = thisString.split('.').last.toLowerCase();
+    return extension == 'jpg' ? 'jpeg' : extension;
+  }
 }
