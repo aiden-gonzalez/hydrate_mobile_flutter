@@ -325,46 +325,43 @@ class _FobCreateViewState extends State<FobCreateView> {
       // Upload the fob picture
       if (imagePath != null) {
         // First request a temporary upload URL from the backend
-        final createdFob = Fob.fromJson(jsonDecode(fobCreationResponse.body) as Map<String, dynamic>);
-        final uploadUrlResponse = await getUploadUrl(
-          useTokenStore().state.accessToken,
-          createdFob.id
-        );
+        final createdFob =
+            Fob.fromJson(jsonDecode(fobCreationResponse.body) as Map<String, dynamic>);
+        final uploadUrlResponse =
+            await getUploadUrl(useTokenStore().state.accessToken, createdFob.id);
 
         if (uploadUrlResponse.statusCode != 200) {
           toast.showToast(context, "Failed to get upload URL: ${uploadUrlResponse.body}");
           return;
         }
 
-        // Now upload the image using that URL
-        final uploadResponse = await uploadPicture(imagePath!, File(imagePath!));
+        final signedPictureUrl =
+            PictureSignedUrl.fromJson(jsonDecode(uploadUrlResponse.body) as Map<String, dynamic>);
 
-        final signedPictureUrl = PictureSignedUrl.fromJson(
-            jsonDecode(uploadUrlResponse.body) as Map<String, dynamic>
-          );
+        // Now upload the image using that URL
+        final uploadResponse = await uploadPicture(signedPictureUrl.signedUrl, File(imagePath!));
 
         if (uploadResponse.statusCode != 200) {
-          toast.showToast(context, "Failed to upload image: ${await uploadResponse.stream.bytesToString()}");
+          toast.showToast(
+              context, "Failed to upload image: ${await uploadResponse.stream.bytesToString()}");
           // Try to tell the server to delete the picture
-          await deletePicture(
-            useTokenStore().state.accessToken,
-            signedPictureUrl.pictureId
-          );
+          await deletePicture(useTokenStore().state.accessToken, signedPictureUrl.pictureId);
           return;
         }
 
         // Finally, tell the server the picture was successfully uploaded
         final updateResponse = await updatePictureStatus(
-          useTokenStore().state.accessToken,
-          signedPictureUrl.pictureId,
-          false
-        );
-        
+            useTokenStore().state.accessToken, signedPictureUrl.pictureId, false);
+
+        debugPrint("Done with update request, response: ${updateResponse.statusCode}");
+
         if (updateResponse.statusCode != 200) {
           toast.showToast(context, "Failed to update picture status: ${updateResponse.body}");
           return;
         }
       }
+
+      debugPrint("Everything went well, should toast and pop");
 
       // Everything went well, show a success message and pop
       toast.showToast(context, "Fob created successfully");

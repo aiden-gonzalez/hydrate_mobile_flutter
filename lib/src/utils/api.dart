@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:latlong2/latlong.dart';
 
-
 import 'package:hydrate_mobile_flutter/src/models/auth.dart';
 import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
 import 'package:hydrate_mobile_flutter/src/utils/env.dart';
@@ -101,17 +100,17 @@ Future<http.StreamedResponse> uploadPicture(String uploadUrl, File imageFile) as
 Future<http.Response> apiRequest(HttpMethod method, String path,
     {Map<String, String>? params, Object? body, String? token}) {
   // Set up URI with path and params
-  Uri uri =
-      Uri.parse("${Environment.backendApiUrl()}/api/$path").replace(queryParameters: params ?? {});
+  Uri uri = Uri.parse("${Environment.backendApiUrl()}/api/$path");
+  if (params != null) {
+    uri = uri.replace(queryParameters: params);
+  }
   debugPrint(uri.toString());
 
   // JSON encode body
   String jsonBody = jsonEncode(body);
 
   // Set up headers
-  Map<String, String> headers = {
-    'Content-Type': 'application/json'
-  };
+  Map<String, String> headers = {'Content-Type': 'application/json'};
   if (token != null) {
     headers['Authorization'] = token;
   }
@@ -119,7 +118,7 @@ Future<http.Response> apiRequest(HttpMethod method, String path,
   return switch (method) {
     HttpMethod.get => http.get(uri, headers: headers),
     HttpMethod.post => http.post(uri, headers: headers, body: jsonBody),
-    HttpMethod.put => http.put(uri),
+    HttpMethod.put => http.put(uri, headers: headers, body: jsonBody),
     HttpMethod.delete => http.delete(uri, headers: headers)
   };
 }
