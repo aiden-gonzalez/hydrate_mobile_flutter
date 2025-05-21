@@ -1,12 +1,15 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:hydrate_mobile_flutter/src/models/auth.dart';
-import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
-import 'package:hydrate_mobile_flutter/src/utils/env.dart';
 import 'dart:convert';
 import 'package:latlong2/latlong.dart';
 
-enum HttpMethod { get, post }
+
+import 'package:hydrate_mobile_flutter/src/models/auth.dart';
+import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
+import 'package:hydrate_mobile_flutter/src/utils/env.dart';
+
+enum HttpMethod { get, post, put, delete }
 
 // AUTH ENDPOINTS
 
@@ -48,10 +51,7 @@ Future<List<Fob>> getFobsInArea(String token, LatLng location, {int radiusInMete
 
   final fobsJson = await apiRequest(HttpMethod.get, "fobs", params: params, token: token);
 
-  final decodedFobs = 
-    (jsonDecode(fobsJson.body) as List)
-    .map((f) => Fob.fromJson(f))
-    .toList();
+  final decodedFobs = (jsonDecode(fobsJson.body) as List).map((f) => Fob.fromJson(f)).toList();
 
   return decodedFobs;
 }
@@ -65,28 +65,55 @@ Future<FobWithDetails> getFobWithDetails(String token, String fobId) async {
 }
 
 // RATING ENDPOINTS
+
 Future<http.Response> createRating(String token, String fobId, dynamic ratingDetails) {
   Map<String, dynamic> request = ratingDetails.toJson();
 
   return apiRequest(HttpMethod.post, "fobs/$fobId/ratings", body: request, token: token);
 }
 
+// PICTURE ENDPOINTS
+
+Future<http.Response> getUploadUrl(String token, String fobId) {
+  return apiRequest(HttpMethod.get, "fobs/$fobId/pictures/upload", token: token);
+}
+
+Future<http.Response> deletePicture(String token, String pictureId) {
+  return apiRequest(HttpMethod.delete, "pictures/$pictureId", token: token);
+}
+
+// API UTILS
+
+Future<http.StreamedResponse> uploadPicture(String uploadUrl, File imageFile) async {
+  var request = http.Request('PUT', Uri.parse(uploadUrl));
+  request.headers.addAll({'Content-Type': 'application/octet-stream'});
+  request.bodyBytes = await imageFile.readAsBytes();
+
+  return await request.send();
+}
+
 Future<http.Response> apiRequest(HttpMethod method, String path,
     {Map<String, String>? params, Object? body, String? token}) {
   // Set up URI with path and params
-  Uri uri = Uri.parse("${Environment.backendApiUrl()}/api/$path").replace(queryParameters: params ?? {});
+  Uri uri =
+      Uri.parse("${Environment.backendApiUrl()}/api/$path").replace(queryParameters: params ?? {});
   debugPrint(uri.toString());
 
   // JSON encode body
   String jsonBody = jsonEncode(body);
 
+  // Set up headers
+  Map<String, String> headers = {
+    'Content-Type': 'application/json'
+  };
+  if (token != null) {
+    headers['Authorization'] = token;
+  }
+
   return switch (method) {
-    HttpMethod.get => http.get(uri, headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Authorization': token ?? ""
-      }),
-    HttpMethod.post => http.post(uri,
-        headers: <String, String>{'Content-Type': 'application/json', 'Authorization': token ?? ""},
-        body: jsonBody)
+    HttpMethod.get => http.get(uri, headers: headers),
+    HttpMethod.post => http.post(uri, headers: headers, body: jsonBody),
+    HttpMethod.put => http.put(uri),
+    HttpMethod.delete => http.delete(uri, headers: headers)
   };
 }
