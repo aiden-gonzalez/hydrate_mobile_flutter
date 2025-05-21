@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
@@ -13,7 +14,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 class FobCreateView extends StatefulWidget {
-  const FobCreateView({super.key, required this.camera, required this.initialLocation, required this.initialZoom});
+  const FobCreateView(
+      {super.key, required this.camera, required this.initialLocation, required this.initialZoom});
 
   final CameraDescription camera;
   final LatLng initialLocation;
@@ -241,8 +243,7 @@ class _FobCreateViewState extends State<FobCreateView> {
                 secondary: const Icon(Icons.water_drop),
               ),
             ),
-          if (!isFountain)
-            ..._buildBathroomFields(),
+          if (!isFountain) ..._buildBathroomFields(),
           ElevatedButton(
             onPressed: _submitFob,
             child: const Text('Submit'),
@@ -295,7 +296,9 @@ class _FobCreateViewState extends State<FobCreateView> {
   Future<void> _submitFob() async {
     if (_formKey.currentState!.validate()) {
       final isFountain = _selectedFobType[0];
-      final response = await createFob(
+
+      // First create the Fob
+      final fobCreationResponse = await createFob(
         useTokenStore().state.accessToken,
         FobCreationDetails(
           type: isFountain ? FobType.fountain : FobType.bathroom,
@@ -314,12 +317,45 @@ class _FobCreateViewState extends State<FobCreateView> {
         ),
       );
 
-      if (response.statusCode == 201) {
-        toast.showToast(context, "Fob created successfully");
-        Navigator.pop(context);
-      } else {
-        toast.showToast(context, "Failed to create fob: ${response.body}");
+      if (fobCreationResponse.statusCode != 201) {
+        toast.showToast(context, "Failed to create fob: ${fobCreationResponse.body}");
+        return;
       }
+
+      // Upload the fob picture
+      if (imagePath != null) {
+        // First request a temporary upload URL from the backend
+        final createdFob = Fob.fromJson(jsonDecode(fobCreationResponse.body) as Map<String, dynamic>);
+        final uploadUrlResponse = await getUploadUrl(
+          useTokenStore().state.accessToken,
+          createdFob.id
+        );
+
+        if (uploadUrlResponse.statusCode != 200) {
+          toast.showToast(context, "Failed to get upload URL: ${uploadUrlResponse.body}");
+          return;
+        }
+
+        // Now upload the image using that URL
+        final uploadResponse = await uploadPicture(imagePath!, File(imagePath!));
+
+        if (uploadResponse.statusCode != 200) {
+          toast.showToast(context, "Failed to upload image: ${await uploadResponse.stream.bytesToString()}");
+          // Try to tell the server to delete the picture
+          final signedPictureUrl = PictureSignedUrl.fromJson(
+            jsonDecode(uploadUrlResponse.body) as Map<String, dynamic>
+          );
+          await deletePicture(
+            useTokenStore().state.accessToken,
+            signedPictureUrl.pictureId
+          );
+          return;
+        }
+      }
+
+      // Everything went well, show a success message and pop
+      toast.showToast(context, "Fob created successfully");
+      Navigator.pop(context);
     }
   }
 }
