@@ -183,18 +183,28 @@ class _FobRatingCreateViewState extends State<FobRatingCreateView> {
               washing: washing,
             );
 
-      final response = await createRating(
+      final ratingCreationResponse = await createRating(
         useTokenStore().state.accessToken,
         widget.fobId,
         ratingDetails,
       );
 
-      if (response.statusCode == 201) {
-        toast.showToast(context, "Rating submitted successfully");
-        Navigator.pop(context);
-      } else {
-        toast.showToast(context, "Failed to submit rating: ${response.body}");
+      if (ratingCreationResponse.statusCode != 201) {
+        toast.showToast(context, "Failed to submit rating: ${ratingCreationResponse.body}");
+        return;
       }
+
+      // Now upload the image if it exists
+      if (imagePath != null) {
+        try {
+          await pictureUploadFlow(useTokenStore().state.accessToken, widget.fobId, File(imagePath!));
+          toast.showToast(context, "Rating submitted successfully");
+        } catch (error) {
+          toast.showToast(context, "Rating created successfully, but picture failed to upload: $error");
+        }
+      }
+      
+      Navigator.pop(context);
     }
   }
 }
