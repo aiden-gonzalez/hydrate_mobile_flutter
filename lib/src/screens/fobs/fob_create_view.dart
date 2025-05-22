@@ -62,13 +62,13 @@ class _FobCreateViewState extends State<FobCreateView> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 5),
-                _buildFobTypeToggle(),
+                buildFobTypeToggle(),
                 const SizedBox(height: 10),
-                _buildMap(),
+                buildMap(),
                 const SizedBox(height: 10),
-                _buildImagePicker(),
+                buildImagePicker(),
                 const SizedBox(height: 10),
-                _buildFobForm(),
+                buildFobForm(),
               ],
             ),
           ),
@@ -77,7 +77,7 @@ class _FobCreateViewState extends State<FobCreateView> {
     );
   }
 
-  Widget _buildFobTypeToggle() {
+  Widget buildFobTypeToggle() {
     final List<Text> types = [
       Text(fountainLabel, style: Theme.of(context).textTheme.titleMedium),
       Text(bathroomLabel, style: Theme.of(context).textTheme.titleMedium),
@@ -103,7 +103,7 @@ class _FobCreateViewState extends State<FobCreateView> {
     );
   }
 
-  Widget _buildMap() {
+  Widget buildMap() {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Container(
@@ -150,7 +150,7 @@ class _FobCreateViewState extends State<FobCreateView> {
     );
   }
 
-  Widget _buildImagePicker() {
+  Widget buildImagePicker() {
     final ImagePicker picker = ImagePicker();
 
     return Padding(
@@ -213,7 +213,7 @@ class _FobCreateViewState extends State<FobCreateView> {
     );
   }
 
-  Widget _buildFobForm() {
+  Widget buildFobForm() {
     final isFountain = _selectedFobType[0];
 
     return Form(
@@ -243,9 +243,9 @@ class _FobCreateViewState extends State<FobCreateView> {
                 secondary: const Icon(Icons.water_drop),
               ),
             ),
-          if (!isFountain) ..._buildBathroomFields(),
+          if (!isFountain) ...buildBathroomFields(),
           ElevatedButton(
-            onPressed: _submitFob,
+            onPressed: submitFob,
             child: const Text('Submit'),
           ),
         ],
@@ -253,7 +253,7 @@ class _FobCreateViewState extends State<FobCreateView> {
     );
   }
 
-  List<Widget> _buildBathroomFields() {
+  List<Widget> buildBathroomFields() {
     return [
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -293,7 +293,7 @@ class _FobCreateViewState extends State<FobCreateView> {
     ];
   }
 
-  Future<void> _submitFob() async {
+  Future<void> submitFob() async {
     if (_formKey.currentState!.validate()) {
       final isFountain = _selectedFobType[0];
 
@@ -324,44 +324,17 @@ class _FobCreateViewState extends State<FobCreateView> {
 
       // Upload the fob picture
       if (imagePath != null) {
-        // First request a temporary upload URL from the backend
-        final createdFob =
-            Fob.fromJson(jsonDecode(fobCreationResponse.body) as Map<String, dynamic>);
-        final uploadUrlResponse =
-            await getUploadUrl(useTokenStore().state.accessToken, createdFob.id);
-
-        if (uploadUrlResponse.statusCode != 200) {
-          toast.showToast(context, "Failed to get upload URL: ${uploadUrlResponse.body}");
-          return;
-        }
-
-        final signedPictureUrl =
-            PictureSignedUrl.fromJson(jsonDecode(uploadUrlResponse.body) as Map<String, dynamic>);
-
-        // Now upload the image using that URL
-        final uploadResponse = await uploadPicture(signedPictureUrl.signedUrl, File(imagePath!));
-
-        if (uploadResponse.statusCode != 200) {
-          toast.showToast(
-              context, "Failed to upload image: ${await uploadResponse.stream.bytesToString()}");
-          // Try to tell the server to delete the picture
-          await deletePicture(useTokenStore().state.accessToken, signedPictureUrl.pictureId);
-          return;
-        }
-
-        // Finally, tell the server the picture was successfully uploaded
-        final updateResponse = await updatePictureStatus(
-            useTokenStore().state.accessToken, signedPictureUrl.pictureId, false);
-
-        debugPrint("Done with update request, response: ${updateResponse.statusCode}");
-
-        if (updateResponse.statusCode != 200) {
-          toast.showToast(context, "Failed to update picture status: ${updateResponse.body}");
+        try {
+          await pictureUploadFlow(
+            useTokenStore().state.accessToken,
+            jsonDecode(fobCreationResponse.body)['id'] as String,
+            File(imagePath!),
+          );
+        } catch (error) {
+          toast.showToast(context, "Failed to upload picture: $error");
           return;
         }
       }
-
-      debugPrint("Everything went well, should toast and pop");
 
       // Everything went well, show a success message and pop
       toast.showToast(context, "Fob created successfully");

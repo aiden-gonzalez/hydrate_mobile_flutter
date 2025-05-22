@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:hydrate_mobile_flutter/src/models/misc.dart';
 import 'dart:convert';
 import 'package:latlong2/latlong.dart';
 
@@ -76,6 +77,34 @@ Future<http.Response> createRating(String token, String fobId, dynamic ratingDet
 }
 
 // PICTURE ENDPOINTS
+
+Future<void> pictureUploadFlow(String token, String fobId, File imageFile) async {
+  // First request a temporary upload URL from the backend
+  final uploadUrlResponse = await getUploadUrl(token, fobId);
+
+  if (uploadUrlResponse.statusCode != 200) {
+    return Future.error("Failed to get upload URL: ${uploadUrlResponse.body}");
+  }
+
+  final signedPictureUrl =
+      PictureSignedUrl.fromJson(jsonDecode(uploadUrlResponse.body) as Map<String, dynamic>);
+
+  // Now upload the image using that URL
+  final uploadResponse = await uploadPicture(signedPictureUrl.signedUrl, imageFile);
+
+  if (uploadResponse.statusCode != 200) {
+    // Try to tell the server to delete the picture
+    await deletePicture(token, signedPictureUrl.pictureId);
+    return Future.error("Failed to upload image: ${await uploadResponse.stream.bytesToString()}");
+  }
+
+  // Finally, tell the server the picture was successfully uploaded
+  final updateResponse = await updatePictureStatus(token, signedPictureUrl.pictureId, false);
+
+  if (updateResponse.statusCode != 200) {
+    return Future.error("Failed to update picture status: ${updateResponse.body}");
+  }
+}
 
 Future<http.Response> getUploadUrl(String token, String fobId) {
   return apiRequest(HttpMethod.get, "fobs/$fobId/pictures/upload", token: token);
