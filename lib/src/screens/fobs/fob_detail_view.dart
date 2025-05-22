@@ -32,7 +32,7 @@ class FobDetailView extends StatefulWidget {
 class _FobDetailViewState extends State<FobDetailView> {
   late Future<FobWithDetails> fobDetailsFuture;
   
-  final SizedBox fobPicture = SizedBox(
+  final SizedBox skeletonFobPicture = SizedBox(
     width: double.infinity,
     child: Image.asset("assets/images/flutter_logo.png")
   );
@@ -201,7 +201,7 @@ class _FobDetailViewState extends State<FobDetailView> {
             ),
             const SizedBox(width: 10), // Replace Spacer with SizedBox for consistent spacing
             Text(
-              "${fobWithDetails.fob.averageRating ?? "No"} stars",
+              "${fobWithDetails.fob.averageRating?.toStringAsFixed(1) ?? "No"} stars",
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(width: 10),
@@ -241,50 +241,73 @@ class _FobDetailViewState extends State<FobDetailView> {
     );
   }
 
+  Widget buildPageStack() {
+    return Stack(
+      children: [
+        FutureBuilder<FobWithDetails>(
+          future: fobDetailsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return skeletonFobPicture;
+            } else if (snapshot.hasError) {
+              return Center(child: Text("Error loading fob pictures"));
+            } else {
+              // Check if the pictures list is empty
+              if (snapshot.data!.pictures.isEmpty) {
+                return skeletonFobPicture;
+              }
+              return Image.network(
+                snapshot.data!.pictures[0].url,
+                fit: BoxFit.cover,
+                width: double.infinity,
+              );
+            }
+          }
+        ),
+        DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          maxChildSize: 1.0,
+          minChildSize: 0.6,
+          builder: (context, scrollController) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              clipBehavior: Clip.hardEdge,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+                color: Theme.of(context).canvasColor,
+              ),
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: FutureBuilder<FobWithDetails>(
+                  future: fobDetailsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return buildSkeleton();
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text("Error loading fob details"));
+                    } else {
+                      return buildFobDetails(snapshot.data!);
+                    }
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.fobId.startsWith(constants.fountainIdPrefix) ? "Fountain" : "Bathroom"),
       ),
-      body: Stack(
-        children: [
-          fobPicture,
-          DraggableScrollableSheet(
-            initialChildSize: 0.6,
-            maxChildSize: 1.0,
-            minChildSize: 0.6,
-            builder: (context, scrollController) {
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                clipBehavior: Clip.hardEdge,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                  color: Theme.of(context).canvasColor,
-                ),
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: FutureBuilder<FobWithDetails>(
-                    future: fobDetailsFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return buildSkeleton();
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text("Error loading fob details"));
-                      } else {
-                        return buildFobDetails(snapshot.data!);
-                      }
-                    },
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+      body: buildPageStack(),
       floatingActionButton: FloatingActionButton.extended(
         label: const Text("Add Rating"),
         onPressed: () async {
