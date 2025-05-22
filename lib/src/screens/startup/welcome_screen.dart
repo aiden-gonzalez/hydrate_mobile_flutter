@@ -8,6 +8,7 @@ import 'package:hydrate_mobile_flutter/src/screens/nav_bar_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/screens/startup/login_screen.dart';
 import 'package:hydrate_mobile_flutter/src/screens/startup/signup_screen.dart';
+import 'package:hydrate_mobile_flutter/src/utils/api.dart' as api;
 import 'package:hydrate_mobile_flutter/src/utils/auth.dart';
 import 'package:hydrate_mobile_flutter/src/utils/stores.dart';
 
@@ -26,6 +27,14 @@ class WelcomeScreen extends StatelessWidget {
       
       // If no tokens, stay on welcome screen
       if (tokens == null) {
+        return;
+      }
+
+      // Make sure token actually works
+      final tokenCheckResponse = await api.checkToken(tokens.accessToken);
+      if (tokenCheckResponse.statusCode != 200) {
+        // Token or account is invalid, clear tokens and stay on welcome screen
+        await AuthService.logout();
         return;
       }
 

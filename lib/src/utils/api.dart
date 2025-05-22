@@ -28,6 +28,10 @@ Future<http.Response> refreshToken(String refreshToken, String expiredToken) {
   return apiRequest(HttpMethod.post, "auth/refresh", body: request);
 }
 
+Future<http.Response> checkToken(String token) {
+  return apiRequest(HttpMethod.get, "auth", token: token);
+}
+
 // TODO implement this endpoint in the backend
 Future<http.Response> sendPasswordResetEmail(String email) {
   Map<String, String> request = {'email': email};
