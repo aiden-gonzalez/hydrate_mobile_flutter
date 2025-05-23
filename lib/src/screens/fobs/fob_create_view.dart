@@ -7,6 +7,7 @@ import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
 import 'package:hydrate_mobile_flutter/src/models/misc.dart';
 import 'package:hydrate_mobile_flutter/src/screens/take_picture_screen.dart';
 import 'package:hydrate_mobile_flutter/src/utils/api.dart';
+import 'package:hydrate_mobile_flutter/src/utils/images.dart';
 import 'package:hydrate_mobile_flutter/src/utils/stores.dart';
 import 'package:hydrate_mobile_flutter/src/utils/toast.dart' as toast;
 import 'package:image_picker/image_picker.dart';
@@ -191,8 +192,10 @@ class _FobCreateViewState extends State<FobCreateView> {
                   InkWell(
                     onTap: () async {
                       final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+                      // Process the image to make it square
+                      final processedImagePath = await processImageToSquare(pickedImage?.path ?? "");
                       setState(() {
-                        imagePath = pickedImage?.path;
+                        imagePath = processedImagePath;
                       });
                     },
                     child: SizedBox(
