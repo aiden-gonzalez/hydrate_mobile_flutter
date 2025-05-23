@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
+import 'package:hydrate_mobile_flutter/src/models/misc.dart';
 import 'package:hydrate_mobile_flutter/src/models/ratings.dart';
 import 'package:hydrate_mobile_flutter/src/screens/fobs/fob_rating_create_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/profile_view.dart';
@@ -31,6 +32,7 @@ class FobDetailView extends StatefulWidget {
 
 class _FobDetailViewState extends State<FobDetailView> {
   late Future<FobWithDetails> fobDetailsFuture;
+  int _currentImageIndex = 0;
   
   final SizedBox skeletonFobPicture = SizedBox(
     width: double.infinity,
@@ -241,27 +243,89 @@ class _FobDetailViewState extends State<FobDetailView> {
     );
   }
 
+  Widget buildImageScroll(List<Picture> pictures) {
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        PageView.builder(
+          itemCount: pictures.length,
+          onPageChanged: (index) {
+            setState(() {
+              _currentImageIndex = index;
+            });
+          },
+          itemBuilder: (context, index) {
+            return Image.network(
+              pictures[index].url,
+              fit: BoxFit.fitHeight,
+              width: double.infinity,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Center(child: CircularProgressIndicator());
+              },
+              errorBuilder: (context, error, stackTrace) => 
+                Center(child: Icon(Icons.error, size: 50)),
+            );
+          },
+        ),
+        Positioned(
+          bottom: 20,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.black54,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(
+                pictures.length,
+                (index) => Container(
+                  width: 8,
+                  height: 8,
+                  margin: EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _currentImageIndex == index 
+                        ? Colors.white 
+                        : Colors.white38,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget buildPageStack() {
     return Stack(
       children: [
-        FutureBuilder<FobWithDetails>(
-          future: fobDetailsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return skeletonFobPicture;
-            } else if (snapshot.hasError) {
-              return Center(child: Text("Error loading fob pictures"));
-            } else {
-              // Check if the pictures list is empty
-              if (snapshot.data!.pictures.isEmpty) {
-                return skeletonFobPicture;
-              }
-              return Image.network(
-                snapshot.data!.pictures[0].url,
-                fit: BoxFit.cover,
-                width: double.infinity,
-              );
-            }
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // Calculate the height of the image based on the screen size
+            double imageHeight = constraints.maxHeight * 0.4;
+
+            return SizedBox(
+              height: imageHeight,
+              child: FutureBuilder<FobWithDetails>(
+                future: fobDetailsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return skeletonFobPicture;
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text("Error loading fob pictures"));
+                  } else {
+                    // Check if the pictures list is empty
+                    if (snapshot.data!.pictures.isEmpty) {
+                      return skeletonFobPicture;
+                    }
+                    return buildImageScroll(snapshot.data!.pictures);
+                  }
+                }
+              )
+            );
           }
         ),
         DraggableScrollableSheet(
