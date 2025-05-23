@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
 import 'package:hydrate_mobile_flutter/src/screens/fobs/fob_create_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/fobs/fob_detail_view.dart';
@@ -32,17 +33,105 @@ class _OpenMapViewState extends State<OpenMapView> {
     userAgentPackageName: "dev.fleaflet.flutter_map.example",
   );
 
-  LatLng fobsCenter = LatLng(40.429052, -86.913124); // Center of fetched fobs
+  LatLng fobsCenter = LatLng(40.429052, -86.913124); // Default center until we get user location
   List<Fob> fobs = []; // Fobs currently fetched for map
   List<Marker> markers = []; // Markers currently on map
   
   Timer? debounceTimer;
+  bool _isLoadingLocation = false;
 
   @override
   void initState() {
     super.initState();
-    // Initial marker fetch
-    fetchMarkers(fobsCenter, 1000);
+    // Get user location and initialize map
+    _getCurrentLocation();
+  }
+
+  // Request permission and get current location
+  Future<void> _getCurrentLocation() async {
+    setState(() {
+      _isLoadingLocation = true;
+    });
+    
+    try {
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        // Location services are not enabled
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Location services are disabled')),
+        );
+        setState(() {
+          _isLoadingLocation = false;
+        });
+        fetchMarkersForCamera(mapController.camera);
+        return;
+      }
+      
+      // Check location permission
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          // Permissions are denied
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location permissions are denied')),
+          );
+          setState(() {
+            _isLoadingLocation = false;
+          });
+          // Initialize with default location
+          fetchMarkersForCamera(mapController.camera);
+          return;
+        }
+      }
+      
+      if (permission == LocationPermission.deniedForever) {
+        // Permissions are permanently denied
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Location permissions are permanently denied')),
+        );
+        setState(() {
+          _isLoadingLocation = false;
+        });
+        // Initialize with default location
+        fetchMarkersForCamera(mapController.camera);
+        return;
+      }
+      
+      // Get current position
+      Position position = await Geolocator.getCurrentPosition();
+      LatLng userLocation = LatLng(position.latitude, position.longitude);
+      
+      setState(() {
+        fobsCenter = userLocation;
+        _isLoadingLocation = false;
+      });
+      
+      // Move map to user location and fetch markers
+      mapController.move(userLocation, mapController.camera.zoom);
+      fetchMarkersForCamera(mapController.camera);
+      
+    } catch (e) {
+      debugPrint('Error getting location: $e');
+      setState(() {
+        _isLoadingLocation = false;
+      });
+      // Initialize with default location on error
+      fetchMarkersForCamera(mapController.camera);
+    }
+  }
+
+  // Navigate to user location
+  void _navigateToUserLocation() {
+    _getCurrentLocation();
+  }
+
+  Future<void> fetchMarkersForCamera(MapCamera camera) async {
+    return fetchMarkers(
+      camera.center,
+      getMapRadius(camera.visibleBounds)
+    );
   }
 
   Future<void> fetchMarkers(LatLng cameraPosition, int radius) async {
@@ -122,10 +211,7 @@ class _OpenMapViewState extends State<OpenMapView> {
       debounceTimer?.cancel();
 
       debounceTimer = Timer(const Duration(milliseconds: 500), () {
-        fetchMarkers(
-          mapController.camera.center,
-          getMapRadius(mapController.camera.visibleBounds)
-        );
+        fetchMarkersForCamera(mapController.camera);
       });
     }
   }
@@ -157,26 +243,42 @@ class _OpenMapViewState extends State<OpenMapView> {
                   MarkerLayer(markers: markers)
                 ]
               ),
-              floatingActionButton: FloatingActionButton.extended(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => FobCreateView(
-                      camera: widget.camera,
-                      initialLocation: mapController.camera.center,
-                      initialZoom: mapController.camera.zoom
-                    )),
-                  ).then((success) => {
-                    if (success != null && success) {
-                      fetchMarkers(
-                        mapController.camera.center,
-                        getMapRadius(mapController.camera.visibleBounds)
-                      )
-                    }
-                  });
-                },
-                label: const Text("Contribute"),
-                icon: const Icon(Icons.add),
+              floatingActionButton: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // Location button
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: FloatingActionButton(
+                      heroTag: "locationBtn",
+                      onPressed: _navigateToUserLocation,
+                      backgroundColor: Colors.white,
+                      child: _isLoadingLocation 
+                          ? const CircularProgressIndicator()
+                          : const Icon(Icons.my_location, color: Colors.blue),
+                    ),
+                  ),
+                  // Contribute button
+                  FloatingActionButton.extended(
+                    heroTag: "contributeBtn",
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => FobCreateView(
+                          camera: widget.camera,
+                          initialLocation: mapController.camera.center,
+                          initialZoom: mapController.camera.zoom
+                        )),
+                      ).then((success) => {
+                        if (success != null && success) {
+                          fetchMarkersForCamera(mapController.camera)
+                        }
+                      });
+                    },
+                    label: const Text("Contribute"),
+                    icon: const Icon(Icons.add),
+                  ),
+                ],
               ),
             ),
           ),
