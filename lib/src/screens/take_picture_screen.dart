@@ -76,7 +76,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                           if (snapshot.connectionState == ConnectionState.done) {
                             // Center the preview and crop to fit the square
                             return Center(
-                              child: Container(
+                              child: SizedBox(
                                 width: double.infinity,
                                 height: double.infinity,
                                 child: ClipRect(
