@@ -243,40 +243,64 @@ class _OpenMapViewState extends State<OpenMapView> {
                   MarkerLayer(markers: markers)
                 ]
               ),
-              floatingActionButton: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
+              floatingActionButton: Stack(
                 children: [
-                  // Location button
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: FloatingActionButton(
-                      heroTag: "locationBtn",
-                      onPressed: _navigateToUserLocation,
-                      backgroundColor: Colors.white,
-                      child: _isLoadingLocation 
-                          ? const CircularProgressIndicator()
-                          : const Icon(Icons.my_location, color: Colors.blue),
+                  // Left side column with reset rotation and location buttons
+                  Positioned(
+                    left: 30.0,
+                    bottom: 0,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        // Reset rotation button
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: FloatingActionButton(
+                            heroTag: "resetRotationBtn",
+                            onPressed: () {
+                              // Reset map rotation to north up (0 degrees)
+                              mapController.rotate(0);
+                            },
+                            backgroundColor: Colors.white,
+                            child: const Icon(Icons.explore, color: Colors.blue),
+                          ),
+                        ),
+                        // Location button
+                        FloatingActionButton(
+                          heroTag: "locationBtn",
+                          onPressed: _navigateToUserLocation,
+                          backgroundColor: Colors.white,
+                          child: _isLoadingLocation 
+                              ? const CircularProgressIndicator()
+                              : const Icon(Icons.my_location, color: Colors.blue),
+                        ),
+                      ],
                     ),
                   ),
-                  // Contribute button
-                  FloatingActionButton.extended(
-                    heroTag: "contributeBtn",
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => FobCreateView(
-                          camera: widget.camera,
-                          initialLocation: mapController.camera.center,
-                          initialZoom: mapController.camera.zoom
-                        )),
-                      ).then((success) => {
-                        if (success != null && success) {
-                          fetchMarkersForCamera(mapController.camera)
-                        }
-                      });
-                    },
-                    label: const Text("Contribute"),
-                    icon: const Icon(Icons.add),
+                  
+                  // Contribute button - right side (bottom right corner)
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: FloatingActionButton.extended(
+                      heroTag: "contributeBtn",
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => FobCreateView(
+                            camera: widget.camera,
+                            initialLocation: mapController.camera.center,
+                            initialZoom: mapController.camera.zoom
+                          )),
+                        ).then((success) => {
+                          if (success != null && success) {
+                            fetchMarkersForCamera(mapController.camera)
+                          }
+                        });
+                      },
+                      label: const Text("Contribute"),
+                      icon: const Icon(Icons.add),
+                    ),
                   ),
                 ],
               ),
