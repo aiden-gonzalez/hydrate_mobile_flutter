@@ -120,6 +120,12 @@ Future<http.Response> deletePicture(String token, String pictureId) {
   return apiRequest(HttpMethod.delete, "pictures/$pictureId", token: token);
 }
 
+// PROFILE ENDPOINTS
+
+Future<http.Response> getUserContributions(String token, String username) async {
+  return await apiRequest(HttpMethod.get, "profiles/$username/contributions", token: token);
+}
+
 // API UTILS
 
 Future<http.StreamedResponse> uploadPicture(String uploadUrl, File imageFile) async {
