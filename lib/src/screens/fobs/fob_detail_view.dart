@@ -97,9 +97,11 @@ class _FobDetailViewState extends State<FobDetailView> {
                 child: Icon(Icons.star, color: starIconColor),
               ),
               const SizedBox(width: 10),
-              RatingDetailsWidget(
-                headerText: ratingWithDetails.user.username,
-                rating: ratingWithDetails.rating
+              Expanded(
+                child: RatingDetailsWidget(
+                  headerText: ratingWithDetails.user.username,
+                  rating: ratingWithDetails.rating
+                ),
               )
             ],
           ),

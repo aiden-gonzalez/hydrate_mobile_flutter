@@ -101,39 +101,76 @@ class _ProfileViewState extends State<ProfileView> {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       elevation: 2,
-      child: ListTile(
-        leading: Icon(icon, color: Theme.of(context).primaryColor),
-        title: Text(rating.fobId),
-        subtitle: Text(rating.createdAt.toString()),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.star, size: 16, color: Colors.amber),
-            const SizedBox(width: 4),
-            Text(rating.value.toString()),
-            const SizedBox(width: 8),
-            const Icon(Icons.arrow_forward_ios, size: 16),
-          ],
-        ),
-        onTap: () {
-          // Show a dialog or navigate to a details page
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text('Rating Details'),
-              content: RatingDetailsWidget(
-                headerText: rating.fobId,
-                rating: rating,
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('Close'),
+            // Header row with icon and title
+            Row(
+              children: [
+                Icon(icon, color: Theme.of(context).primaryColor),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        rating.fobId,
+                        style: Theme.of(context).textTheme.titleMedium,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        rating.createdAt.toString(),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          );
-        },
+            
+            // Divider between header and details
+            const Divider(),
+            
+            // Rating details with average rating at center-right
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Rating details on the left
+                Expanded(
+                  child: RatingDetailsWidget(
+                    headerText: "",  // Empty header since we already show the ID above
+                    rating: rating,
+                  ),
+                ),
+                
+                // Average rating indicator on the right
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  margin: const EdgeInsets.only(left: 8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.star, size: 18, color: Colors.amber),
+                      const SizedBox(width: 4),
+                      Text(
+                        rating.average.toStringAsFixed(1),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

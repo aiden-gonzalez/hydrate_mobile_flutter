@@ -77,6 +77,28 @@ class Rating {
     this.updatedAt,
   });
 
+  double get average {
+    if (details is BathroomRatingDetails) {
+      final bathroomDetails = details as BathroomRatingDetails;
+      return (bathroomDetails.cleanliness +
+              bathroomDetails.decor +
+              bathroomDetails.drying +
+              bathroomDetails.privacy +
+              bathroomDetails.washing) /
+          5.0;
+    } else if (details is FountainRatingDetails) {
+      final fountainDetails = details as FountainRatingDetails;
+      return (fountainDetails.pressure +
+              fountainDetails.taste +
+              fountainDetails.temperature) /
+          3.0;
+    }
+    return 0.0; // Default case, should not happen
+  }
+
+  bool get isFountainRating => details is FountainRatingDetails;
+  bool get isBathroomRating => details is BathroomRatingDetails;
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'fob_id': fobId,
