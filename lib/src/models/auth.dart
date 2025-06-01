@@ -1,3 +1,5 @@
+import 'package:hydrate_mobile_flutter/src/models/profiles.dart';
+
 class AuthRequest {
   final String email;
   final String password;
@@ -91,25 +93,6 @@ class AuthSuccessResponse {
       expires: 0,
       username: "");
   }
-}
-
-class Profile {
-  final String fullName;
-  final String pictureLink;
-
-  const Profile({required this.fullName, required this.pictureLink});
-
-  factory Profile.fromJson(Map<String, dynamic> json) {
-    return Profile(
-      fullName: json['full_name'] as String,
-      pictureLink: json['picture_link'] as String,
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-    'full_name': fullName,
-    'picture_link': pictureLink,
-  };
 }
 
 class User {

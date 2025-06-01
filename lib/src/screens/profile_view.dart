@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hydrate_mobile_flutter/src/models/profiles.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/utils/api.dart';
-import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
 import 'package:hydrate_mobile_flutter/src/utils/auth.dart';
 import 'package:hydrate_mobile_flutter/src/utils/stores.dart';
 
@@ -22,9 +22,7 @@ class _ProfileViewState extends State<ProfileView> {
   String? errorMessage;
 
   // Contribution data
-  List<dynamic> fountains = [];
-  List<dynamic> bathrooms = [];
-  List<dynamic> ratings = [];
+  UserContributions? userContributions;
 
   @override
   void initState() {
@@ -43,19 +41,19 @@ class _ProfileViewState extends State<ProfileView> {
       final tokens = await AuthService.checkOrRefreshToken(tokenStore.state);
       if (tokens == null) {
         debugPrint("Unable to fetch user contributions: No valid token");
-        return Future.error("No valid token");
+        throw Exception("No valid token");
       }
 
-      final contributions = await getUserContributions(tokens.accessToken);
-      if (contributions == null) {
-        debugPrint("Unable to fetch user contributions: No contributions found");
-        return Future.error("No contributions found");
+      final contributionsResponse = await getOwnUserContributions(tokens.accessToken);
+      if (contributionsResponse.statusCode != 200) {
+        debugPrint("Unable to fetch user contributions: ${contributionsResponse.body}");
+        throw Exception("Failed to fetch contributions: ${contributionsResponse.body}");
       }
+
+      final contributions = UserContributions.fromJson(contributionsResponse.body as Map<String, dynamic>);
 
       setState(() {
-        fountains = contributions['fountains'] ?? [];
-        bathrooms = contributions['bathrooms'] ?? [];
-        ratings = contributions['ratings'] ?? [];
+        userContributions = contributions;
         isLoading = false;
       });
     } catch (e) {
@@ -149,7 +147,7 @@ class _ProfileViewState extends State<ProfileView> {
                   SizedBox(
                     width: 100,
                     child: Column(children: [
-                      Text("${fountains.length}",
+                      Text("${userContributions?.fountains.length ?? 0}",
                           style: Theme.of(context).textTheme.headlineMedium),
                       const SizedBox(height: 15),
                       Text("Fountains",
@@ -159,7 +157,7 @@ class _ProfileViewState extends State<ProfileView> {
                   SizedBox(
                     width: 100,
                     child: Column(children: [
-                      Text("${bathrooms.length}",
+                      Text("${userContributions?.bathrooms.length ?? 0}",
                           style: Theme.of(context).textTheme.headlineMedium),
                       const SizedBox(height: 15),
                       Text("Bathrooms",
@@ -169,7 +167,8 @@ class _ProfileViewState extends State<ProfileView> {
                   SizedBox(
                     width: 100,
                     child: Column(children: [
-                      Text("${ratings.length}",
+                      Text("${(userContributions?.fountainRatings.length ?? 0)
+                              + (userContributions?.bathroomRatings.length ?? 0)}",
                           style: Theme.of(context).textTheme.headlineMedium),
                       const SizedBox(height: 15),
                       Text("Ratings",
@@ -202,9 +201,9 @@ class _ProfileViewState extends State<ProfileView> {
             Expanded(
               child: TabBarView(
                 children: [
-                  _buildContributionList(fountains, Icons.water_drop, 'fountain'),
-                  _buildContributionList(bathrooms, Icons.wc, 'bathroom'),
-                  _buildContributionList(ratings, Icons.star, 'rating'),
+                  _buildContributionList(userContributions?.fountains ?? [], Icons.water_drop, 'fountain'),
+                  _buildContributionList(userContributions?.bathrooms ?? [], Icons.wc, 'bathroom'),
+                  _buildContributionList(userContributions?.getSortedRatings() ?? [], Icons.star, 'rating'),
                 ],
               ),
             ),

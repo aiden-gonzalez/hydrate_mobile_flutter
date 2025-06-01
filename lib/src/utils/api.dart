@@ -122,6 +122,10 @@ Future<http.Response> deletePicture(String token, String pictureId) {
 
 // PROFILE ENDPOINTS
 
+Future<http.Response> getOwnUserContributions(String token) async {
+  return await apiRequest(HttpMethod.get, "me/contributions", token: token);
+}
+
 Future<http.Response> getUserContributions(String token, String username) async {
   return await apiRequest(HttpMethod.get, "profiles/$username/contributions", token: token);
 }
