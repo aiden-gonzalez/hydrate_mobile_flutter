@@ -57,8 +57,11 @@ class SettingsView extends StatelessWidget {
                     // Clear the stored tokens
                     AuthService.logout();
             
-                    // Navigate to the welcome screen
-                    Navigator.of(context).pushReplacementNamed('/welcome');
+                    // Clear the entire navigation stack and push welcome screen
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/welcome', 
+                      (route) => false, // This predicate removes all previous routes
+                    );
                   },
                   child: const Text('Sign Out'),
                 ),
