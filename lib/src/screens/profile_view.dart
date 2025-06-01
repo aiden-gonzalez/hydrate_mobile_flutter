@@ -105,13 +105,34 @@ class _ProfileViewState extends State<ProfileView> {
         leading: Icon(icon, color: Theme.of(context).primaryColor),
         title: Text(rating.fobId),
         subtitle: Text(rating.createdAt.toString()),
-        trailing: RatingDetailsWidget(
-          headerText: rating.fobId,
-          rating: rating
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.star, size: 16, color: Colors.amber),
+            const SizedBox(width: 4),
+            Text(rating.value.toString()),
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_forward_ios, size: 16),
+          ],
         ),
         onTap: () {
-          // Navigate to detail view of the rated resource
-          // Navigator.pushNamed(context, '/details/${item['resourceType']}/${item['resourceId']}');
+          // Show a dialog or navigate to a details page
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Rating Details'),
+              content: RatingDetailsWidget(
+                headerText: rating.fobId,
+                rating: rating,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Close'),
+                ),
+              ],
+            ),
+          );
         },
       ),
     );
