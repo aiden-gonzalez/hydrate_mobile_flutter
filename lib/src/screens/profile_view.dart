@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
 import 'package:hydrate_mobile_flutter/src/models/profiles.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/utils/api.dart';
@@ -50,7 +53,7 @@ class _ProfileViewState extends State<ProfileView> {
         throw Exception("Failed to fetch contributions: ${contributionsResponse.body}");
       }
 
-      final contributions = UserContributions.fromJson(contributionsResponse.body as Map<String, dynamic>);
+      final contributions = UserContributions.fromJson(jsonDecode(contributionsResponse.body));
 
       setState(() {
         userContributions = contributions;
@@ -97,20 +100,35 @@ class _ProfileViewState extends State<ProfileView> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (errorMessage != null) {
-      return Center(child: Text(errorMessage!));
-    }
-
-    if (items.isEmpty) {
-      return Center(child: Text('No $type contributions yet'));
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.only(top: 16),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        return _buildContributionCard(items[index], icon, type);
-      },
+    // Always wrap with RefreshIndicator, even for error and empty states
+    return RefreshIndicator(
+      onRefresh: fetchUserContributions,
+      child: errorMessage != null
+          ? ListView(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 100, left: 20, right: 20),
+                  child: Center(child: Text(errorMessage!)),
+                ),
+              ],
+            )
+          : items.isEmpty
+              ? ListView(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 100),
+                      child: Center(child: Text('No $type contributions yet')),
+                    ),
+                  ],
+                )
+              : ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.only(top: 16),
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    return _buildContributionCard(items[index], icon, type);
+                  },
+                ),
     );
   }
 
@@ -167,8 +185,7 @@ class _ProfileViewState extends State<ProfileView> {
                   SizedBox(
                     width: 100,
                     child: Column(children: [
-                      Text("${(userContributions?.fountainRatings.length ?? 0)
-                              + (userContributions?.bathroomRatings.length ?? 0)}",
+                      Text("${userContributions?.ratings.length ?? 0}",
                           style: Theme.of(context).textTheme.headlineMedium),
                       const SizedBox(height: 15),
                       Text("Ratings",
@@ -203,7 +220,7 @@ class _ProfileViewState extends State<ProfileView> {
                 children: [
                   _buildContributionList(userContributions?.fountains ?? [], Icons.water_drop, 'fountain'),
                   _buildContributionList(userContributions?.bathrooms ?? [], Icons.wc, 'bathroom'),
-                  _buildContributionList(userContributions?.getSortedRatings() ?? [], Icons.star, 'rating'),
+                  _buildContributionList(userContributions?.ratings ?? [], Icons.star, 'rating'),
                 ],
               ),
             ),

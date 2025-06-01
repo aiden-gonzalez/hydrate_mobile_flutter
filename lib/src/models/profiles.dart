@@ -22,49 +22,36 @@ class Profile {
 }
 
 class UserContributions {
-  final List<Fob> fountains;
-  final List<Fob> bathrooms;
-  final List<Rating> fountainRatings;
-  final List<Rating> bathroomRatings;
+  final List<Fob> fobs;
+  final List<Rating> ratings;
   final List<Picture> pictures;
 
   const UserContributions({
-    required this.bathrooms,
-    required this.fountains,
-    required this.fountainRatings,
-    required this.bathroomRatings,
+    required this.fobs,
+    required this.ratings,
     required this.pictures
   });
 
-  List<Rating> getSortedRatings() {
-    final ratings = [...fountainRatings, ...bathroomRatings];
-    ratings.sort((a, b) => (a.createdAt ?? 0) > (b.createdAt ?? 0) ? -1 : 1);
-    return ratings;
-  }
+  List<Fob> get fountains => fobs.where((fob) => fob.info == FountainInfo).toList();
+  List<Fob> get bathrooms => fobs.where((fob) => fob.info is BathroomInfo).toList();
 
   factory UserContributions.fromJson(Map<String, dynamic> json) {
     return UserContributions(
-      fountains: (json['fountains'] as List)
-          .map((fountain) => Fob.fromJson(fountain))
+      fobs: (json['fobs'] as List)
+          .map((fob) => Fob.fromJson(fob))
           .toList(),
-      bathrooms: (json['bathrooms'] as List)
-          .map((bathroom) => Fob.fromJson(bathroom))
-          .toList(),
-      fountainRatings: (json['fountain_ratings'] as List)
+      ratings: (json['ratings'] as List)
           .map((rating) => Rating.fromJson(rating))
           .toList(),
-      bathroomRatings: (json['bathroom_ratings'] as List)
-          .map((rating) => Rating.fromJson(rating))
-          .toList(),
-      pictures: json['pictures'] as List<Picture>
+      pictures: (json['pictures'] as List)
+          .map((picture) => Picture.fromJson(picture))
+          .toList()
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'fountains': fountains,
-    'bathrooms': bathrooms,
-    'fountain_ratings': fountainRatings,
-    'bathroom_ratings': bathroomRatings,
+    'fobs': fobs,
+    'ratings': ratings,
     'pictures': pictures
   };
 }
