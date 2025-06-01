@@ -6,6 +6,7 @@ import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
 import 'package:hydrate_mobile_flutter/src/models/profiles.dart';
 import 'package:hydrate_mobile_flutter/src/models/ratings.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
+import 'package:hydrate_mobile_flutter/src/screens/settings/settings_view.dart';
 import 'package:hydrate_mobile_flutter/src/utils/api.dart';
 import 'package:hydrate_mobile_flutter/src/utils/auth.dart';
 import 'package:hydrate_mobile_flutter/src/utils/stores.dart';
@@ -221,7 +222,24 @@ class _ProfileViewState extends State<ProfileView> {
       length: 3,
       initialIndex: currentTab,
       child: Scaffold(
-        appBar: AppBar(title: const Text("Profile")),
+        appBar: AppBar(
+          title: const Text("Profile"),
+          actions: [
+            // Add settings button in the app bar
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => SettingsView(
+                      settingsControler: widget.settingsController,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
         body: Column(
           children: [
             Column(crossAxisAlignment: CrossAxisAlignment.center, children: [

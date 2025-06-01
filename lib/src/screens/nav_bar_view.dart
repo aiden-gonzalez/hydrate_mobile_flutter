@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:hydrate_mobile_flutter/src/screens/map/open_map_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/profile_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
-import 'package:hydrate_mobile_flutter/src/screens/settings/settings_view.dart';
 
 /// Edited flutter code sample for [NavigationBar].
 
@@ -45,11 +44,6 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
             ),
             label: 'Profile',
           ),
-          NavigationDestination(
-            selectedIcon: Badge(child: Icon(Icons.settings)),
-            icon: Badge(child: Icon(Icons.settings_outlined)),
-            label: 'Settings',
-          ),
         ],
       ),
       body: IndexedStack(
@@ -59,10 +53,7 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
           OpenMapView(settingsController: widget.settingsController, camera: widget.camera),
 
           /// Profile page
-          ProfileView(settingsController: widget.settingsController),
-
-          /// Settings page
-          SettingsView(settingsControler: widget.settingsController)
+          ProfileView(settingsController: widget.settingsController)
         ]),
     );
   }
