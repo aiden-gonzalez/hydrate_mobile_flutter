@@ -33,11 +33,16 @@ class TakePictureScreenState extends State<TakePictureScreen> {
       ResolutionPreset.medium,
     );
 
-    // Next, initialize the controller. This returns a Future.
-    _initializeControllerFuture = _controller.initialize();
-
     // Default to flash off
     _flashEnabled = false;
+
+    // Next, initialize the controller. This returns a Future.
+    _initializeControllerFuture = _controller.initialize().then((_) {
+      // Explicitly set initial flash mode to match our UI state
+      if (mounted) {
+        _controller.setFlashMode(FlashMode.off);
+      }
+    });
   }
 
   @override
@@ -45,6 +50,30 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     // Dispose of the controller when the widget is disposed.
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _syncFlashState() async {
+    try {
+      // Ensure the controller is initialized
+      if (!_controller.value.isInitialized) {
+        await _initializeControllerFuture;
+      }
+
+      // Get current flash mode from camera
+      final currentMode = _controller.value.flashMode;
+      debugPrint('Before sync - Camera flash mode: ${currentMode.toString()}');
+      debugPrint('Before sync - UI flash state: ${_flashEnabled ? "ON" : "OFF"}');
+
+      // Set the flash mode according to current UI state
+      final targetMode = _flashEnabled ? FlashMode.always : FlashMode.off;
+      await _controller.setFlashMode(targetMode);
+
+      // Verify the change took effect
+      final newMode = _controller.value.flashMode;
+      debugPrint('After sync - Camera flash mode: ${newMode.toString()}');
+    } catch (e) {
+      debugPrint('Error syncing flash mode: $e');
+    }
   }
 
   @override
@@ -120,19 +149,24 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                 children: [
                   FloatingActionButton(
                     onPressed: () async {
+                      // First check the camera's current flash mode
+                      final currentFlashMode = _controller.value.flashMode;
+                      debugPrint('Current flash mode: $currentFlashMode');
+
                       try {
-                        if (_flashEnabled) {
-                          await _controller.setFlashMode(FlashMode.off);
-                          setState(() {
-                            _flashEnabled = false;
-                          });
-                        } else {
-                          await _controller.setFlashMode(FlashMode.always);
-                          setState(() {
-                            _flashEnabled = true;
-                          });
-                        }
-                        debugPrint('Flash mode set successfully: $_flashEnabled');
+                        // What we want the flash mode to be
+                        final newFlashMode = _flashEnabled ? FlashMode.off : FlashMode.always;
+                        final newFlashEnabled = !_flashEnabled;
+
+                        // Update the camera first, before changing UI state
+                        await _controller.setFlashMode(newFlashMode);
+
+                        // Only update UI state if the camera update was successful
+                        setState(() {
+                          _flashEnabled = newFlashEnabled;
+                        });
+
+                        debugPrint('Flash mode toggled to: ${_flashEnabled ? "ON" : "OFF"}');
                       } catch (e) {
                         debugPrint('Error setting flash mode: $e');
                       }
@@ -169,6 +203,9 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                             ),
                           ),
                         );
+
+                        // When we return from the preview screen, sync the flash state
+                        await _syncFlashState();
                 
                         // If imagePath isn't null (picture was accepted), pop it up the stack
                         if (imagePath != null && context.mounted) {
