@@ -1,7 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:hydrate_mobile_flutter/src/custom_widgets/rating_details_widget.dart';
+import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
 import 'package:hydrate_mobile_flutter/src/models/profiles.dart';
+import 'package:hydrate_mobile_flutter/src/models/ratings.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/utils/api.dart';
 import 'package:hydrate_mobile_flutter/src/utils/auth.dart';
@@ -66,21 +69,21 @@ class _ProfileViewState extends State<ProfileView> {
     }
   }
 
-  Widget _buildContributionCard(dynamic item, IconData icon, String type) {
+  Widget _buildFobCard(Fob fob, IconData icon) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       elevation: 2,
       child: ListTile(
         leading: Icon(icon, color: Theme.of(context).primaryColor),
-        title: Text(item['name'] ?? 'Unnamed $type'),
-        subtitle: Text(item['location'] ?? 'No location information'),
+        title: Text(fob.name),
+        subtitle: Text(fob.location.toString()),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (item['rating'] != null) ...[
+            if (fob.averageRating != null) ...[
               Icon(Icons.star, size: 16, color: Colors.amber),
               const SizedBox(width: 4),
-              Text('${item['rating']}'),
+              Text(fob.averageRating!.toStringAsFixed(1)),
               const SizedBox(width: 8),
             ],
             Icon(Icons.arrow_forward_ios, size: 16),
@@ -89,6 +92,26 @@ class _ProfileViewState extends State<ProfileView> {
         onTap: () {
           // Navigate to detail view
           // Navigator.pushNamed(context, '/details/$type/${item['id']}');
+        },
+      ),
+    );
+  }
+
+  Widget _buildRatingCard(Rating rating, IconData icon) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      elevation: 2,
+      child: ListTile(
+        leading: Icon(icon, color: Theme.of(context).primaryColor),
+        title: Text(rating.fobId),
+        subtitle: Text(rating.createdAt.toString()),
+        trailing: RatingDetailsWidget(
+          headerText: rating.fobId,
+          rating: rating
+        ),
+        onTap: () {
+          // Navigate to detail view of the rated resource
+          // Navigator.pushNamed(context, '/details/${item['resourceType']}/${item['resourceId']}');
         },
       ),
     );
@@ -125,8 +148,11 @@ class _ProfileViewState extends State<ProfileView> {
                   padding: const EdgeInsets.only(top: 16),
                   itemCount: items.length,
                   itemBuilder: (context, index) {
-                    return _buildContributionCard(items[index], icon, type);
-                  },
+                    if (type == 'rating') {
+                      return _buildRatingCard(items[index] as Rating, icon);
+                    }
+                    return _buildFobCard(items[index] as Fob, icon);
+                  }
                 ),
     );
   }
