@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:hydrate_mobile_flutter/src/custom_widgets/rating_details_widget.dart';
 import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
 import 'package:hydrate_mobile_flutter/src/models/misc.dart';
 import 'package:hydrate_mobile_flutter/src/models/ratings.dart';
@@ -10,7 +11,6 @@ import 'package:hydrate_mobile_flutter/src/utils/api.dart';
 import 'package:hydrate_mobile_flutter/src/utils/auth.dart';
 import 'package:hydrate_mobile_flutter/src/utils/constants.dart' as constants;
 import 'package:hydrate_mobile_flutter/src/utils/stores.dart';
-import 'package:hydrate_mobile_flutter/src/utils/strings.dart';
 
 // Define color constants
 const Color skeletonColor = Color(0xFFE0E0E0);
@@ -84,7 +84,6 @@ class _FobDetailViewState extends State<FobDetailView> {
   }
 
   Widget buildRatingCard(BuildContext context, {required RatingWithDetails ratingWithDetails}) {
-    Map<String, dynamic> ratingDetails = ratingWithDetails.rating.details.toJson();
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Card(
@@ -98,38 +97,10 @@ class _FobDetailViewState extends State<FobDetailView> {
                 child: Icon(Icons.star, color: starIconColor),
               ),
               const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      ratingWithDetails.user.username,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    const SizedBox(height: 5),
-                    for (var property in ratingDetails.entries)
-                      Row(
-                        children: [
-                          ...[
-                            Text(
-                              "${property.key.capitalize()}: ",
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-                            )
-                          ],
-                          ...List.generate(5, (index) {
-                            return Icon(
-                              index < (property.value ?? 0)
-                                  ? Icons.star
-                                  : Icons.star_border,
-                              size: 16,
-                              color: Colors.amber,
-                            );
-                          }),
-                        ],
-                      )
-                  ],
-                ),
-              ),
+              RatingDetailsWidget(
+                headerText: ratingWithDetails.user.username,
+                rating: ratingWithDetails.rating
+              )
             ],
           ),
         ),
