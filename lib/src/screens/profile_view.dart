@@ -1,10 +1,12 @@
 import 'dart:convert';
 
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrate_mobile_flutter/src/custom_widgets/rating_details_widget.dart';
 import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
 import 'package:hydrate_mobile_flutter/src/models/profiles.dart';
 import 'package:hydrate_mobile_flutter/src/models/ratings.dart';
+import 'package:hydrate_mobile_flutter/src/screens/fobs/fob_detail_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_view.dart';
 import 'package:hydrate_mobile_flutter/src/utils/api.dart';
@@ -12,9 +14,10 @@ import 'package:hydrate_mobile_flutter/src/utils/auth.dart';
 import 'package:hydrate_mobile_flutter/src/utils/stores.dart';
 
 class ProfileView extends StatefulWidget {
-  const ProfileView({super.key, required this.settingsController});
+  const ProfileView({super.key, required this.settingsController, required this.camera});
 
   final SettingsController settingsController;
+  final CameraDescription camera;
 
   static const String routeName = "/profile";
 
@@ -91,8 +94,17 @@ class _ProfileViewState extends State<ProfileView> {
           ],
         ),
         onTap: () {
-          // Navigate to detail view
-          // Navigator.pushNamed(context, '/details/$type/${item['id']}');
+          // Navigate to the detail view for this fob
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FobDetailView(
+                settingsController: widget.settingsController,
+                camera: widget.camera,
+                fobId: fob.id,
+              ),
+            ),
+          );
         },
       ),
     );

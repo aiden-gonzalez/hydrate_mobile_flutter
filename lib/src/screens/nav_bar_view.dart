@@ -53,7 +53,7 @@ class _HydrateNavigationState extends State<HydrateNavigation> {
           OpenMapView(settingsController: widget.settingsController, camera: widget.camera),
 
           /// Profile page
-          ProfileView(settingsController: widget.settingsController)
+          ProfileView(settingsController: widget.settingsController, camera: widget.camera)
         ]),
     );
   }

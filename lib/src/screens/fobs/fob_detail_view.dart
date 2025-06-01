@@ -156,7 +156,7 @@ class _FobDetailViewState extends State<FobDetailView> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ProfileView(settingsController: widget.settingsController),
+                    builder: (context) => ProfileView(settingsController: widget.settingsController, camera: widget.camera),
                   ),
                 );
               },
