@@ -32,8 +32,8 @@ class UserContributions {
     required this.pictures
   });
 
-  List<Fob> get fountains => fobs.where((fob) => fob.info == FountainInfo).toList();
-  List<Fob> get bathrooms => fobs.where((fob) => fob.info is BathroomInfo).toList();
+  List<Fob> get fountains => fobs.where((fob) => fob.isFountain()).toList();
+  List<Fob> get bathrooms => fobs.where((fob) => fob.isBathroom()).toList();
 
   factory UserContributions.fromJson(Map<String, dynamic> json) {
     return UserContributions(
