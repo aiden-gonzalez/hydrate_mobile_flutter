@@ -68,6 +68,10 @@ Future<FobWithDetails> getFobWithDetails(String token, String fobId) async {
   return FobWithDetails.fromJson(decodedFobWithDetails);
 }
 
+Future<http.Response> deleteFob(String token, String fobId) {
+  return apiRequest(HttpMethod.delete, "fobs/$fobId", token: token);
+}
+
 // RATING ENDPOINTS
 
 Future<http.Response> createRating(String token, String fobId, dynamic ratingDetails) {

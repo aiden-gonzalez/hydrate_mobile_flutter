@@ -334,7 +334,16 @@ class _FobCreateViewState extends State<FobCreateView> {
             File(imagePath!),
           );
         } catch (error) {
-          toast.showToast(context, "Failed to upload picture: $error");
+          toast.showToast(context, "Failed to create due to picture upload failure: $error");
+          // Delete the fob
+          try {
+            await deleteFob(
+              useTokenStore().state.accessToken,
+              jsonDecode(fobCreationResponse.body)['id'] as String,
+            );
+          } catch (deleteError) {
+            toast.showToast(context, "Failed to delete fob after picture upload failure: $deleteError");
+          }
           return;
         }
       }
