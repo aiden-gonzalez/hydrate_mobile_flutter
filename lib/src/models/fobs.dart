@@ -183,7 +183,7 @@ class Fob {
 
 class FobWithDetails {
   final Fob fob;
-  final User user;
+  final User? user; // Null if the creator has deleted their account
   final List<Picture> pictures;
   final List<RatingWithDetails> ratingsWithDetails;
 
@@ -196,7 +196,7 @@ class FobWithDetails {
 
   Map<String, dynamic> toJson() => {
         'fob': fob.toJson(),
-        'user': user.toJson(),
+        if (user != null) 'user': user!.toJson(),
         'pictures': pictures.map((picture) => picture.toJson()).toList(),
         'ratingsWithDetails': ratingsWithDetails.map((rwd) => rwd.toJson()).toList()
       };
@@ -204,7 +204,7 @@ class FobWithDetails {
   factory FobWithDetails.fromJson(Map<String, dynamic> json) {
     return FobWithDetails(
       fob: Fob.fromJson(json['fob']),
-      user: User.fromJson(json['user']),
+      user: json['user'] == null ? null : User.fromJson(json['user'] as Map<String, dynamic>),
       pictures: (json['pictures'] as List<dynamic>)
           .map((picture) => Picture.fromJson(picture as Map<String, dynamic>))
           .toList(),

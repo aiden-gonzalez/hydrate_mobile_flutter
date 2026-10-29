@@ -140,7 +140,14 @@ class _OpenMapViewState extends State<OpenMapView> {
       return;
     }
 
-    final fobsInArea = await getFobsInArea(tokens.accessToken, cameraPosition, radiusInMeters: radius);
+    List<Fob> fobsInArea;
+    try {
+      fobsInArea = await getFobsInArea(tokens.accessToken, cameraPosition, radiusInMeters: radius);
+    } catch (e) {
+      debugPrint("Unable to fetch markers: $e");
+      return;
+    }
+    if (!mounted) return;
     for (var fob in fobsInArea) {
       fetchedMarkers.add(
         Marker(
@@ -159,7 +166,9 @@ class _OpenMapViewState extends State<OpenMapView> {
                     fobId: fob.id
                   )
                 )
-              );
+              ).then((changed) {
+                if (changed == true) fetchMarkersForCamera(mapController.camera);
+              });
             },
             child: Icon(
               Icons.location_pin,
@@ -311,6 +320,7 @@ class _OpenMapViewState extends State<OpenMapView> {
                 fobsCenter: fobsCenter,
                 camera: widget.camera,
                 settingsController: widget.settingsController,
+                onFobChanged: () => fetchMarkersForCamera(mapController.camera),
               ),
             ),
         ],
