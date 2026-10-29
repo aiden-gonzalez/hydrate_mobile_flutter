@@ -46,12 +46,15 @@ upload key can be reset through Play Console support, but that takes time.
 If `key.properties` is missing, release builds fall back to the debug key (fine for local
 testing, but rejected by Play).
 
-Build the bundle to upload to Play:
+Build the bundle to upload to Play, pointing it at the production backend:
 
 ```
-flutter build appbundle --release
+flutter build appbundle --release --dart-define=BACKEND_API_URL=https://YOUR_API_HOST
 # -> build/app/outputs/bundle/release/app-release.aab
 ```
+
+`--dart-define=BACKEND_API_URL` overrides the value in `.env` (which still has to exist, since
+it's bundled as an asset).
 
 Bump `version:` in `pubspec.yaml` (the `+N` build number must increase) for every upload.
 

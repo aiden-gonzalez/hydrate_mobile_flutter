@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:hydrate_mobile_flutter/src/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrate_mobile_flutter/src/utils/images.dart';
 import 'package:hydrate_mobile_flutter/src/custom_widgets/display_picure.dart';
@@ -37,7 +38,9 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     _flashEnabled = false;
 
     // Next, initialize the controller. This returns a Future.
-    _initializeControllerFuture = _controller.initialize().then((_) {
+    _initializeControllerFuture = widget.camera.name == noCameraName
+        ? Future.error(CameraException("noCamera", "This device has no camera"))
+        : _controller.initialize().then((_) {
       // Explicitly set initial flash mode to match our UI state
       if (mounted) {
         _controller.setFlashMode(FlashMode.off);
@@ -102,7 +105,18 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                       child: FutureBuilder<void>(
                         future: _initializeControllerFuture,
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.done) {
+                          if (snapshot.hasError) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Text(
+                                  "Camera unavailable. Check that hydRate has camera permission, "
+                                  "or choose a photo from your gallery instead.",
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            );
+                          } else if (snapshot.connectionState == ConnectionState.done) {
                             // Center the preview and crop to fit the square
                             return Center(
                               child: SizedBox(

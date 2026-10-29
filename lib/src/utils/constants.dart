@@ -8,3 +8,6 @@ const String pictureIdPrefix = "pic";
 
 // App identity (also used as the user agent for map tile requests)
 const String appPackageName = "dev.aidengonzalez.hydrate";
+
+// Name of the placeholder CameraDescription used when the device has no camera
+const String noCameraName = "none";
