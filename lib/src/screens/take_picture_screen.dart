@@ -31,6 +31,8 @@ class TakePictureScreenState extends State<TakePictureScreen> {
       widget.camera,
       // Define the resolution to use.
       ResolutionPreset.medium,
+      // Photos only, so don't ask for the microphone
+      enableAudio: false,
     );
 
     // Default to flash off
