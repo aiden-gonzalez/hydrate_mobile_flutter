@@ -14,10 +14,10 @@ class Location {
   factory Location.fromJson(Map<String, dynamic> json) {
     return switch (json) {
       {
-        'latitude': double latitude,
-        'longitude': double longitude
+        'latitude': num latitude,
+        'longitude': num longitude
       } =>
-        Location(lat: latitude, lng: longitude),
+        Location(lat: latitude.toDouble(), lng: longitude.toDouble()),
       _ => throw const FormatException('Failed to decode JSON Location!')
     };
   }

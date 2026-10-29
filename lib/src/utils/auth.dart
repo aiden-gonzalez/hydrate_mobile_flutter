@@ -81,6 +81,48 @@ class AuthService {
     }
   }
 
+  // Exchange an emailed reset code for a new password. Signs the user in on success.
+  static Future<AuthSuccessResponse?> resetPassword(
+      BuildContext context, String code, String newPassword, String confirmPassword) async {
+    try {
+      final response = await api.resetPassword(code, newPassword, confirmPassword);
+      if (response.statusCode != 200) {
+        final body = response.body.isEmpty ? null : jsonDecode(response.body);
+        throw Exception(body is Map && body['message'] != null ? body['message'] : "Password reset failed");
+      }
+      final tokens = AuthSuccessResponse.fromJson(jsonDecode(response.body));
+      useTokenStore().setTokens(tokens);
+      await writeTokens(getConfiguredStorage(), tokens);
+      return tokens;
+    } catch (e) {
+      debugPrint("Error resetting password: $e");
+      if (context.mounted) toast.showToast(context, e.toString().replaceFirst("Exception: ", ""));
+      return null;
+    }
+  }
+
+  // Permanently delete the signed in user's account, then sign out. Returns whether it worked.
+  static Future<bool> deleteAccount(BuildContext context, String password) async {
+    try {
+      final tokens = await checkOrRefreshToken(useTokenStore().state);
+      if (tokens == null) {
+        throw Exception("You need to be signed in to delete your account.");
+      }
+      final response = await api.deleteAccount(tokens.accessToken, password);
+      if (response.statusCode == 401) {
+        throw Exception("Incorrect password.");
+      } else if (response.statusCode != 200) {
+        throw Exception("Couldn't delete your account, please try again.");
+      }
+      await logout();
+      return true;
+    } catch (e) {
+      debugPrint("Error deleting account: $e");
+      if (context.mounted) toast.showToast(context, e.toString().replaceFirst("Exception: ", ""));
+      return false;
+    }
+  }
+
   static Future<void> logout() async {
     useTokenStore().clearTokens();
     await clearTokens(getConfiguredStorage());

@@ -205,6 +205,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
                         // Process the image to make it square and resize it
                         final processedImagePath = await processImageToSquare(image.path);
+                        if (processedImagePath == null || !context.mounted) return;
                 
                         // If the picture was taken, display it on a new screen.
                         final imagePath = await Navigator.push(

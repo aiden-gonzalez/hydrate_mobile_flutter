@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrate_mobile_flutter/src/custom_widgets/rating_details_widget.dart';
+import 'package:hydrate_mobile_flutter/src/custom_widgets/report_dialog.dart';
 import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
 import 'package:hydrate_mobile_flutter/src/models/misc.dart';
 import 'package:hydrate_mobile_flutter/src/models/ratings.dart';
@@ -11,6 +12,7 @@ import 'package:hydrate_mobile_flutter/src/utils/api.dart';
 import 'package:hydrate_mobile_flutter/src/utils/auth.dart';
 import 'package:hydrate_mobile_flutter/src/utils/constants.dart' as constants;
 import 'package:hydrate_mobile_flutter/src/utils/stores.dart';
+import 'package:hydrate_mobile_flutter/src/utils/toast.dart' as toast;
 
 // Define color constants
 const Color skeletonColor = Color(0xFFE0E0E0);
@@ -110,6 +112,65 @@ class _FobDetailViewState extends State<FobDetailView> {
     );
   }
 
+  Widget buildOptionsMenu(FobWithDetails fobWithDetails) {
+    final creator = fobWithDetails.user;
+    final isOwnFob = creator != null && creator.username == useTokenStore().state.username;
+    final hasPicture = fobWithDetails.pictures.isNotEmpty;
+
+    return PopupMenuButton<String>(
+      onSelected: (choice) {
+        switch (choice) {
+          case "reportPlace":
+            showReportDialog(context,
+                contentType: ReportContentType.fob, contentId: fobWithDetails.fob.id, title: "Report this place");
+          case "reportPicture":
+            final index = _currentImageIndex.clamp(0, fobWithDetails.pictures.length - 1);
+            showReportDialog(context,
+                contentType: ReportContentType.picture,
+                contentId: fobWithDetails.pictures[index].id,
+                title: "Report this photo");
+          case "reportUser":
+            showReportDialog(context,
+                contentType: ReportContentType.user, contentId: creator!.username, title: "Report ${creator.username}");
+          case "delete":
+            confirmDeleteFob();
+        }
+      },
+      itemBuilder: (context) => [
+        const PopupMenuItem(value: "reportPlace", child: Text("Report this place")),
+        if (hasPicture) const PopupMenuItem(value: "reportPicture", child: Text("Report this photo")),
+        if (creator != null && !isOwnFob)
+          PopupMenuItem(value: "reportUser", child: Text("Report ${creator.username}")),
+        if (isOwnFob) const PopupMenuItem(value: "delete", child: Text("Delete this place")),
+      ],
+    );
+  }
+
+  Future<void> confirmDeleteFob() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Delete this place?"),
+        content: const Text("This removes it from the map along with all of its ratings and photos."),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Cancel")),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Delete")),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    final tokens = await AuthService.checkOrRefreshToken(useTokenStore().state);
+    final response = tokens == null ? null : await deleteFob(tokens.accessToken, widget.fobId);
+    if (!mounted) return;
+    if (response?.statusCode == 200) {
+      // Tell the previous screen to refresh
+      Navigator.pop(context, true);
+    } else {
+      toast.showToast(context, "Couldn't delete this place, please try again.");
+    }
+  }
+
   Widget buildSkeleton() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,7 +229,7 @@ class _FobDetailViewState extends State<FobDetailView> {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                fobWithDetails.user.username,
+                fobWithDetails.user?.username ?? "Deleted user",
                 style: Theme.of(context).textTheme.bodyLarge,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
@@ -343,6 +404,14 @@ class _FobDetailViewState extends State<FobDetailView> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.fobId.startsWith(constants.fountainIdPrefix) ? "Fountain" : "Bathroom"),
+        actions: [
+          FutureBuilder<FobWithDetails>(
+            future: fobDetailsFuture,
+            builder: (context, snapshot) => snapshot.hasData
+                ? buildOptionsMenu(snapshot.data!)
+                : const SizedBox.shrink(),
+          ),
+        ],
       ),
       body: buildPageStack(),
       floatingActionButton: FloatingActionButton.extended(

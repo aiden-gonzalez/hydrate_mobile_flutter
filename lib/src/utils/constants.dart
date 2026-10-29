@@ -11,3 +11,10 @@ const String appPackageName = "dev.aidengonzalez.hydrate";
 
 // Name of the placeholder CameraDescription used when the device has no camera
 const String noCameraName = "none";
+
+// Legal pages (hosted with GitHub Pages from this repo's docs/ folder)
+const String privacyPolicyUrl = "https://aiden-gonzalez.github.io/hydrate_mobile_flutter/privacy.html";
+const String termsOfUseUrl = "https://aiden-gonzalez.github.io/hydrate_mobile_flutter/terms.html";
+
+// Largest fob search radius the backend accepts
+const int maxFobSearchRadiusMeters = 25000;
