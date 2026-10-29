@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:hydrate_mobile_flutter/src/custom_widgets/osm_map_layers.dart';
 import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
 import 'package:hydrate_mobile_flutter/src/models/misc.dart';
 import 'package:hydrate_mobile_flutter/src/screens/take_picture_screen.dart';
@@ -126,10 +127,7 @@ class _FobCreateViewState extends State<FobCreateView> {
             },
           ),
           children: [
-            TileLayer(
-              urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-              userAgentPackageName: "dev.fleaflet.flutter_map.example",
-            ),
+            osmTileLayer(),
             MarkerLayer(
               markers: [
                 Marker(
@@ -145,6 +143,7 @@ class _FobCreateViewState extends State<FobCreateView> {
                 ),
               ],
             ),
+            osmAttribution(),
           ],
         ),
       ),

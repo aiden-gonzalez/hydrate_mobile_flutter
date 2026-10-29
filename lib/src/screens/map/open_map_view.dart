@@ -4,6 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:hydrate_mobile_flutter/src/custom_widgets/osm_map_layers.dart';
 import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
 import 'package:hydrate_mobile_flutter/src/screens/fobs/fob_create_view.dart';
 import 'package:hydrate_mobile_flutter/src/screens/fobs/fob_detail_view.dart';
@@ -27,11 +28,6 @@ class OpenMapView extends StatefulWidget {
 
 class _OpenMapViewState extends State<OpenMapView> {
   final mapController = MapController();
-
-  TileLayer get openStreetMapTileLayer => TileLayer(
-    urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-    userAgentPackageName: "dev.fleaflet.flutter_map.example",
-  );
 
   LatLng fobsCenter = LatLng(40.429052, -86.913124); // Default center until we get user location
   List<Fob> fobs = []; // Fobs currently fetched for map
@@ -239,8 +235,9 @@ class _OpenMapViewState extends State<OpenMapView> {
                   onMapEvent: onMapEvent
                 ),
                 children: [
-                  openStreetMapTileLayer,
-                  MarkerLayer(markers: markers)
+                  osmTileLayer(),
+                  MarkerLayer(markers: markers),
+                  osmAttribution(),
                 ]
               ),
               floatingActionButton: Stack(

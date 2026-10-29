@@ -1,4 +1,4 @@
-package com.example.hydrate_mobile_flutter
+package dev.aidengonzalez.hydrate
 
 import io.flutter.embedding.android.FlutterActivity
 
