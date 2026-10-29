@@ -62,7 +62,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         style: const TextStyle(
                           fontSize: 20,
                         ),
-                        decoration: InputDecoration.collapsed(hintText: "Username"),
+                        autocorrect: false,
+                        maxLength: 30,
+                        decoration: InputDecoration.collapsed(hintText: "Username (letters, numbers, _ and .)"),
                       ),
                     ),
                     CustomTextField(
@@ -73,7 +75,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         style: const TextStyle(
                           fontSize: 20,
                         ),
-                        decoration: InputDecoration.collapsed(hintText: "Email"),
+                        keyboardType: TextInputType.emailAddress,
+                          autocorrect: false,
+                          decoration: InputDecoration.collapsed(hintText: "Email"),
                       ),
                     ),
                     CustomTextField(
@@ -111,6 +115,10 @@ class _SignupScreenState extends State<SignupScreen> {
                       onPressed: () async {
                         if (username.isEmpty || email.isEmpty || password.isEmpty) {
                           toast.showToast(context, "Please fill in all fields.");
+                          return;
+                        }
+                        if (!RegExp(r'^[A-Za-z0-9_.]{3,30}$').hasMatch(username.trim())) {
+                          toast.showToast(context, "Usernames are 3-30 letters, numbers, underscores or periods.");
                           return;
                         }
                         if (password.length < 8) {

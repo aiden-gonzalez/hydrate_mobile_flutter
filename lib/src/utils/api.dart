@@ -7,6 +7,7 @@ import 'package:latlong2/latlong.dart';
 
 import 'package:hydrate_mobile_flutter/src/models/auth.dart';
 import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
+import 'package:hydrate_mobile_flutter/src/utils/constants.dart';
 import 'package:hydrate_mobile_flutter/src/utils/env.dart';
 
 enum HttpMethod { get, post, put, delete }
@@ -14,13 +15,13 @@ enum HttpMethod { get, post, put, delete }
 // AUTH ENDPOINTS
 
 Future<http.Response> login(String email, String password) {
-  AuthRequest request = AuthRequest(email: email, password: password);
+  AuthRequest request = AuthRequest(email: email.trim(), password: password);
   return apiRequest(HttpMethod.post, "auth", body: request);
 }
 
 Future<http.Response> signup(String username, String email, String password) {
   SignupRequest request =
-      SignupRequest(username: username, authRequest: AuthRequest(email: email, password: password));
+      SignupRequest(username: username.trim(), authRequest: AuthRequest(email: email.trim(), password: password));
   return apiRequest(HttpMethod.post, "signup", body: request);
 }
 
@@ -34,7 +35,7 @@ Future<http.Response> checkToken(String token) {
 }
 
 Future<http.Response> sendPasswordResetEmail(String email) {
-  Map<String, String> request = {'email': email};
+  Map<String, String> request = {'email': email.trim()};
   return apiRequest(HttpMethod.post, "auth/password-reset/request", body: request);
 }
 
@@ -92,10 +93,14 @@ Future<List<Fob>> getFobsInArea(String token, LatLng location, {int radiusInMete
   final params = {
     'latitude': location.latitude.toString(),
     'longitude': location.longitude.toString(),
-    'radius': radiusInMeters.toString()
+    // The backend rejects searches wider than this
+    'radius': radiusInMeters.clamp(1, maxFobSearchRadiusMeters).toString()
   };
 
   final fobsJson = await apiRequest(HttpMethod.get, "fobs", params: params, token: token);
+  if (fobsJson.statusCode != 200) {
+    return Future.error("Failed to get fobs (${fobsJson.statusCode}): ${fobsJson.body}");
+  }
 
   final decodedFobs = (jsonDecode(fobsJson.body) as List).map((f) => Fob.fromJson(f)).toList();
 

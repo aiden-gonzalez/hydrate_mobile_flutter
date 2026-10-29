@@ -50,6 +50,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: const TextStyle(
                             fontSize: 20,
                           ),
+                          keyboardType: TextInputType.emailAddress,
+                          autocorrect: false,
                           decoration: InputDecoration.collapsed(hintText: "Email")),
                     ),
                     CustomTextField(
