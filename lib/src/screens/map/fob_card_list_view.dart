@@ -13,12 +13,14 @@ class FobCardListView extends StatelessWidget {
     required this.fobsCenter,
     required this.camera,
     required this.settingsController,
+    this.onFobChanged,
   });
 
   final List<Fob> fobs;
   final LatLng fobsCenter;
   final CameraDescription camera;
   final SettingsController settingsController;
+  final VoidCallback? onFobChanged; // Called when a fob was changed (e.g. deleted) from its detail view
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +42,9 @@ class FobCardListView extends StatelessWidget {
                     fobId: fob.id,
                   ),
                 ),
-              );
+              ).then((changed) {
+                if (changed == true) onFobChanged?.call();
+              });
             },
             child: Card(
               margin: const EdgeInsets.symmetric(horizontal: 8),

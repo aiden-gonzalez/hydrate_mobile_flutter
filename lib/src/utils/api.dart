@@ -7,6 +7,7 @@ import 'package:latlong2/latlong.dart';
 
 import 'package:hydrate_mobile_flutter/src/models/auth.dart';
 import 'package:hydrate_mobile_flutter/src/models/fobs.dart';
+import 'package:hydrate_mobile_flutter/src/utils/constants.dart';
 import 'package:hydrate_mobile_flutter/src/utils/env.dart';
 
 enum HttpMethod { get, post, put, delete }
@@ -14,13 +15,13 @@ enum HttpMethod { get, post, put, delete }
 // AUTH ENDPOINTS
 
 Future<http.Response> login(String email, String password) {
-  AuthRequest request = AuthRequest(email: email, password: password);
+  AuthRequest request = AuthRequest(email: email.trim(), password: password);
   return apiRequest(HttpMethod.post, "auth", body: request);
 }
 
 Future<http.Response> signup(String username, String email, String password) {
   SignupRequest request =
-      SignupRequest(username: username, authRequest: AuthRequest(email: email, password: password));
+      SignupRequest(username: username.trim(), authRequest: AuthRequest(email: email.trim(), password: password));
   return apiRequest(HttpMethod.post, "signup", body: request);
 }
 
@@ -33,10 +34,52 @@ Future<http.Response> checkToken(String token) {
   return apiRequest(HttpMethod.get, "auth", token: token);
 }
 
-// TODO implement this endpoint in the backend
 Future<http.Response> sendPasswordResetEmail(String email) {
-  Map<String, String> request = {'email': email};
-  return apiRequest(HttpMethod.post, "password-reset", body: request);
+  Map<String, String> request = {'email': email.trim()};
+  return apiRequest(HttpMethod.post, "auth/password-reset/request", body: request);
+}
+
+// Returns auth tokens (AuthSuccessResponse) on success
+Future<http.Response> resetPassword(String code, String newPassword, String confirmPassword) {
+  Map<String, String> request = {
+    'token': code,
+    'new_password': newPassword,
+    'confirm_password': confirmPassword
+  };
+  return apiRequest(HttpMethod.post, "auth/password-reset/reset", body: request);
+}
+
+// Permanently deletes the authenticated user's account
+Future<http.Response> deleteAccount(String token, String password) {
+  Map<String, String> request = {'password': password};
+  return apiRequest(HttpMethod.delete, "me", body: request, token: token);
+}
+
+// REPORT ENDPOINTS
+
+enum ReportContentType { fob, picture, user }
+
+enum ReportReason {
+  spam("Spam"),
+  inappropriate("Inappropriate"),
+  offensive("Offensive or abusive"),
+  inaccurate("Inaccurate or doesn't exist"),
+  other("Other");
+
+  const ReportReason(this.label);
+  final String label;
+}
+
+// contentId is the fob ID, picture ID, or username of the user being reported
+Future<http.Response> reportContent(String token, ReportContentType contentType, String contentId,
+    ReportReason reason, {String? details}) {
+  Map<String, String> request = {
+    'content_type': contentType.name,
+    'content_id': contentId,
+    'reason': reason.name,
+    if (details != null && details.isNotEmpty) 'details': details
+  };
+  return apiRequest(HttpMethod.post, "reports", body: request, token: token);
 }
 
 // FOB ENDPOINTS
@@ -50,10 +93,14 @@ Future<List<Fob>> getFobsInArea(String token, LatLng location, {int radiusInMete
   final params = {
     'latitude': location.latitude.toString(),
     'longitude': location.longitude.toString(),
-    'radius': radiusInMeters.toString()
+    // The backend rejects searches wider than this
+    'radius': radiusInMeters.clamp(1, maxFobSearchRadiusMeters).toString()
   };
 
   final fobsJson = await apiRequest(HttpMethod.get, "fobs", params: params, token: token);
+  if (fobsJson.statusCode != 200) {
+    return Future.error("Failed to get fobs (${fobsJson.statusCode}): ${fobsJson.body}");
+  }
 
   final decodedFobs = (jsonDecode(fobsJson.body) as List).map((f) => Fob.fromJson(f)).toList();
 
@@ -166,6 +213,6 @@ Future<http.Response> apiRequest(HttpMethod method, String path,
     HttpMethod.get => http.get(uri, headers: headers),
     HttpMethod.post => http.post(uri, headers: headers, body: jsonBody),
     HttpMethod.put => http.put(uri, headers: headers, body: jsonBody),
-    HttpMethod.delete => http.delete(uri, headers: headers)
+    HttpMethod.delete => http.delete(uri, headers: headers, body: body == null ? null : jsonBody)
   };
 }

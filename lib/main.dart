@@ -7,29 +7,31 @@ import 'package:hydrate_mobile_flutter/src/utils/stores.dart';
 import 'src/app.dart';
 import 'src/screens/settings/settings_controller.dart';
 import 'src/screens/settings/settings_service.dart';
+import 'src/utils/constants.dart';
 import 'src/utils/storage.dart';
+
+// Prefer the first back camera. Some devices (tablets, Chromebooks, emulators) have no camera at
+// all, or the lookup fails: fall back to a placeholder so the app still starts, and the camera
+// screen shows an error if someone tries to use it.
+Future<CameraDescription> pickCamera() async {
+  try {
+    final cameras = await availableCameras();
+    final backCameras = cameras.where((cam) => cam.lensDirection == CameraLensDirection.back);
+    if (backCameras.isNotEmpty) return backCameras.first;
+    if (cameras.isNotEmpty) return cameras.first;
+  } catch (e) {
+    debugPrint("Unable to list cameras: $e");
+  }
+  return const CameraDescription(
+      name: noCameraName, lensDirection: CameraLensDirection.external, sensorOrientation: 0);
+}
 
 void main() async {
   // Ensure that plugin services are initialized so that `availableCameras()`
   // can be called before `runApp()`
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Obtain a list of the available cameras on the device.
-  final cameras = await availableCameras();
-
-  // Get a specific camera from the list of available cameras.
-  CameraDescription? selectedCamera;
-  final backCameras = cameras
-      .where((CameraDescription cam) =>
-          cam.lensDirection == CameraLensDirection.back)
-      .toList();
-  // If there are any back cameras available, take the first
-  if (backCameras.isEmpty) {
-    selectedCamera = cameras.first;
-  } else {
-    // Otherwise default to the first camera
-    selectedCamera = backCameras.first;
-  }
+  final selectedCamera = await pickCamera();
 
   // Set up the SettingsController, which will glue user settings to multiple
   // Flutter Widgets.

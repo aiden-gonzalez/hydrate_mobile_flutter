@@ -191,8 +191,13 @@ class _FobCreateViewState extends State<FobCreateView> {
                   InkWell(
                     onTap: () async {
                       final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+                      if (pickedImage == null) return;
                       // Process the image to make it square
-                      final processedImagePath = await processImageToSquare(pickedImage?.path ?? "");
+                      final processedImagePath = await processImageToSquare(pickedImage.path);
+                      if (processedImagePath == null) {
+                        if (context.mounted) toast.showToast(context, "Couldn't read that image, please try another.");
+                        return;
+                      }
                       setState(() {
                         imagePath = processedImagePath;
                       });
