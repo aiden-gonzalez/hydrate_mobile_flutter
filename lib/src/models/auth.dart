@@ -98,7 +98,7 @@ class AuthSuccessResponse {
 class User {
   final String id;
   final String username;
-  final String email;
+  final String? email; // Only present for the authenticated user
   final Profile profile;
   final int createdAt;
   final int updatedAt;
@@ -106,7 +106,7 @@ class User {
   const User({
     required this.id,
     required this.username,
-    required this.email,
+    this.email,
     required this.profile,
     required this.createdAt,
     required this.updatedAt,
@@ -116,7 +116,7 @@ class User {
     return User(
       id: json['id'] as String,
       username: json['username'] as String,
-      email: json['email'] as String,
+      email: json['email'] as String?,
       profile: Profile.fromJson(json['profile'] as Map<String, dynamic>),
       createdAt: json['created_at'] as int,
       updatedAt: json['updated_at'] as int,
@@ -126,7 +126,7 @@ class User {
   Map<String, dynamic> toJson() => {
     'id': id,
     'username': username,
-    'email': email,
+    if (email != null) 'email': email,
     'profile': profile.toJson(),
     'created_at': createdAt,
     'updated_at': updatedAt,

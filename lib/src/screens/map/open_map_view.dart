@@ -159,7 +159,9 @@ class _OpenMapViewState extends State<OpenMapView> {
                     fobId: fob.id
                   )
                 )
-              );
+              ).then((changed) {
+                if (changed == true) fetchMarkersForCamera(mapController.camera);
+              });
             },
             child: Icon(
               Icons.location_pin,
@@ -311,6 +313,7 @@ class _OpenMapViewState extends State<OpenMapView> {
                 fobsCenter: fobsCenter,
                 camera: widget.camera,
                 settingsController: widget.settingsController,
+                onFobChanged: () => fetchMarkersForCamera(mapController.camera),
               ),
             ),
         ],

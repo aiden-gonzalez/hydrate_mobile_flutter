@@ -33,10 +33,52 @@ Future<http.Response> checkToken(String token) {
   return apiRequest(HttpMethod.get, "auth", token: token);
 }
 
-// TODO implement this endpoint in the backend
 Future<http.Response> sendPasswordResetEmail(String email) {
   Map<String, String> request = {'email': email};
-  return apiRequest(HttpMethod.post, "password-reset", body: request);
+  return apiRequest(HttpMethod.post, "auth/password-reset/request", body: request);
+}
+
+// Returns auth tokens (AuthSuccessResponse) on success
+Future<http.Response> resetPassword(String code, String newPassword, String confirmPassword) {
+  Map<String, String> request = {
+    'token': code,
+    'new_password': newPassword,
+    'confirm_password': confirmPassword
+  };
+  return apiRequest(HttpMethod.post, "auth/password-reset/reset", body: request);
+}
+
+// Permanently deletes the authenticated user's account
+Future<http.Response> deleteAccount(String token, String password) {
+  Map<String, String> request = {'password': password};
+  return apiRequest(HttpMethod.delete, "me", body: request, token: token);
+}
+
+// REPORT ENDPOINTS
+
+enum ReportContentType { fob, picture, user }
+
+enum ReportReason {
+  spam("Spam"),
+  inappropriate("Inappropriate"),
+  offensive("Offensive or abusive"),
+  inaccurate("Inaccurate or doesn't exist"),
+  other("Other");
+
+  const ReportReason(this.label);
+  final String label;
+}
+
+// contentId is the fob ID, picture ID, or username of the user being reported
+Future<http.Response> reportContent(String token, ReportContentType contentType, String contentId,
+    ReportReason reason, {String? details}) {
+  Map<String, String> request = {
+    'content_type': contentType.name,
+    'content_id': contentId,
+    'reason': reason.name,
+    if (details != null && details.isNotEmpty) 'details': details
+  };
+  return apiRequest(HttpMethod.post, "reports", body: request, token: token);
 }
 
 // FOB ENDPOINTS
@@ -166,6 +208,6 @@ Future<http.Response> apiRequest(HttpMethod method, String path,
     HttpMethod.get => http.get(uri, headers: headers),
     HttpMethod.post => http.post(uri, headers: headers, body: jsonBody),
     HttpMethod.put => http.put(uri, headers: headers, body: jsonBody),
-    HttpMethod.delete => http.delete(uri, headers: headers)
+    HttpMethod.delete => http.delete(uri, headers: headers, body: body == null ? null : jsonBody)
   };
 }

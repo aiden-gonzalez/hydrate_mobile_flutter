@@ -6,6 +6,7 @@ import 'package:hydrate_mobile_flutter/src/custom_widgets/custom_text_field.dart
 import 'package:hydrate_mobile_flutter/src/custom_widgets/screen_title.dart';
 import 'package:hydrate_mobile_flutter/src/custom_widgets/top_screen_image.dart';
 import 'package:hydrate_mobile_flutter/src/screens/settings/settings_controller.dart';
+import 'package:hydrate_mobile_flutter/src/screens/startup/reset_password_screen.dart';
 import 'package:hydrate_mobile_flutter/src/utils/api.dart' as api;
 import 'package:hydrate_mobile_flutter/src/utils/toast.dart' as toast;
 import 'package:hydrate_mobile_flutter/src/utils/auth.dart';
@@ -75,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     CustomAlertButton(
                         buttonText: "Forgot password?",
                         alertTitle: "Reset password?",
-                        alertDescription: "Confirm to send password reset email",
+                        alertDescription: "We'll email a reset code to the address entered above.",
                         dialogResponseHandler: (choice) async {
                           if (choice == "Ok") {
                             if (email.isEmpty) {
@@ -83,11 +84,21 @@ class _LoginScreenState extends State<LoginScreen> {
                               return;
                             }
                             try {
-                              await api.sendPasswordResetEmail(email);
-                              toast.showToast(context, "If an account exists with that email, a reset email has been sent.");
+                              final response = await api.sendPasswordResetEmail(email);
+                              if (!context.mounted) return;
+                              if (response.statusCode == 429) {
+                                toast.showToast(context, "Too many reset requests, please try again later.");
+                                return;
+                              } else if (response.statusCode != 200) {
+                                throw Exception(response.body);
+                              }
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => ResetPasswordScreen(email: email)),
+                              );
                             } catch (e) {
                               debugPrint("Error sending password reset email: $e");
-                              toast.showToast(context, "Failed to send password reset email.");
+                              if (context.mounted) toast.showToast(context, "Failed to send password reset email.");
                             }
                           }
                         })
